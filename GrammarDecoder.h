@@ -154,7 +154,11 @@ inline bool GrammarDecoder<T>::decodeExpression(const std::vector<unsigned int>&
 template<typename T>
 inline bool GrammarDecoder<T>::decodeOperation(const std::vector<unsigned int>& sequence, unsigned int& ptr, unsigned int& wraps, std::shared_ptr<Expression<T>>& outOperation) const {
 
-	// walk through sequence
+	// obtain the two expressions to place on either side of the operation
+	std::shared_ptr<Expression<T>> a, b;
+	if (!decodeExpression(sequence, ptr, wraps, a)) return false;
+	
+	// walk through sequence - for operations, the first operand is given first (before the actual operation type)
 	int head = sequence[ptr];
 	++ptr;
 	if (ptr >= sequence.size()) {
@@ -165,9 +169,6 @@ inline bool GrammarDecoder<T>::decodeOperation(const std::vector<unsigned int>& 
 		}
 	}
 
-	// obtain the two expressions to place on either side of the operation
-	std::shared_ptr<Expression<T>> a, b;
-	if (!decodeExpression(sequence, ptr, wraps, a)) return false;
 	if (!decodeExpression(sequence, ptr, wraps, b)) return false;
 
 	// decode the head into one of the available operations

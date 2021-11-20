@@ -1,4 +1,5 @@
 
+#include <ctime>
 #include "VarX.h"
 #include "Addition.h"
 #include "Multiplication.h"
@@ -27,7 +28,7 @@ int main() {
 	GrammarDecoder<float> decoder(2, operations, functions);
 
 	// Decode test sequence
-	std::vector<unsigned int> sequence = { 1, 3, 0, 2, 3, 0, 2, 2, 2, 1 }; // test sequence - expecting log(2 x cosx)
+	std::vector<unsigned int> sequence = { 1, 3, 0, 3, 2, 0, 2, 2, 2, 1 }; // test sequence - log(2xcosx)
 	ExpressionPtr<float> expression = decoder.decode(sequence);
 	if (expression == nullptr) {
 		printf("\n Invalid sequence decoded from test sequence...\n");
@@ -37,7 +38,31 @@ int main() {
 
 
 
+	// Generate a number of test sequences to see how many turn out valid
+	printf("\n\n\nTesting 10000 sequences to check which ones are found valid...\n");
+	int size = 50;
+	int legal = 0;
+	srand(time(0));
+	for (int i = 0; i < 10000; ++i) {
+		std::vector<unsigned int> seq(size);
+		for (int j = 0; j < size; ++j) {
+			seq[j] = rand() % 1000;
+		}
+		ExpressionPtr<float> expr = decoder.decode(seq);
+		if (expr == nullptr) {
+			printf("\t[[ INVALID SEQUENCE ]]\n");
+		} else {
+			printf("\t- Decoded sequence: %s\n", expr->toString().c_str());
+			++legal;
+		}
+	}
+	printf("\n %d out of 10000 randomly generated expressions were found valid (%d%%)\n", legal, legal/100);
+	return 0;
+
+
+
 	// Test computing derivatives of a test function set up via expressions
+	printf("\n\n\nTesting computed derivatives on pre-built expressions...\n");
 
 	// x^2
 	ExpressionPtr<float> xx = MultiplicationPtrf(VarXPtrf, VarXPtrf); // x * x
