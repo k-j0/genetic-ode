@@ -50,5 +50,8 @@
     <ClInclude Include="Logarithm.h">
       <Filter>Header Files\expressions</Filter>
     </ClInclude>
+    <ClInclude Include="GrammarDecoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

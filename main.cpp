@@ -7,8 +7,37 @@
 #include "Trig.h"
 #include "Exponential.h"
 #include "Logarithm.h"
+#include "GrammarDecoder.h"
 
 int main() {
+
+	// Set up grammar
+	std::vector<GrammaticalElement_base<float>*> operations = {
+		new GrammaticalElement2Args<Addition<float>, float>(),
+		new GrammaticalElement2Args<Subtraction<float>, float>(),
+		new GrammaticalElement2Args<Multiplication<float>, float>(),
+		new GrammaticalElement2Args<Division<float>, float>()
+	};
+	std::vector<GrammaticalElement_base<float>*> functions = {
+		new GrammaticalElement1Arg<Sine<float>, float>(),
+		new GrammaticalElement1Arg<Cosine<float>, float>(),
+		new GrammaticalElement1Arg<Exponential<float>, float>(),
+		new GrammaticalElement1Arg<Logarithm<float>, float>()
+	};
+	GrammarDecoder<float> decoder(2, operations, functions);
+
+	// Decode test sequence
+	std::vector<unsigned int> sequence = { 1, 3, 0, 2, 3, 0, 2, 2, 2, 1 }; // test sequence - expecting log(2 x cosx)
+	ExpressionPtr<float> expression = decoder.decode(sequence);
+	if (expression == nullptr) {
+		printf("\n Invalid sequence decoded from test sequence...\n");
+	} else {
+		printf("\n Decoded sequence: %s\n", expression->toString().c_str());
+	}
+
+
+
+	// Test computing derivatives of a test function set up via expressions
 
 	// x^2
 	ExpressionPtr<float> xx = MultiplicationPtrf(VarXPtrf, VarXPtrf); // x * x
