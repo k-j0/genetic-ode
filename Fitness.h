@@ -48,11 +48,12 @@ class Fitness {
 
 	/**
 	 * Ordinary differential equation for which the fitness will be evaluated
-	 * First parameter is f(x)
-	 * Second parameter is f'(x)
-	 * Third parameter is f''(x)
+	 * First parameter is x
+	 * Second parameter is f(x)
+	 * Third parameter is f'(x)
+	 * Fourth parameter is f''(x)
 	 */
-	const std::function<const T(const T, const T, const T)> function;
+	const std::function<const T(const T, const T, const T, const T)> function;
 
 	/**
 	 * Range of points for which the functions will be evaluated
@@ -68,23 +69,21 @@ class Fitness {
 	/**
 	 * Boundary conditions
 	 */
-	const Boundary<T> boundary1;
-	const Boundary<T> boundary2;
+	std::vector<Boundary<T>> boundaries;
 
 public:
 
 	/**
 	 * Default constructor
-	 * @param std::function<const T(T, T, T) ode	The ordinary differential equation to compute; the first parameter is f(x), the second is f'(x), the third is f''(x).
-	 * @param T rangeStart							Start of the range of points for which the functions will be evaluated
-	 * @param T rangeEnd							End of the range of points for which the functions will be evaluated
-	 * @param int numPoints							Number of points to distribute in the range at which the functions will be evaluated
-	 * @param T lambda								Extra parameter to control how much weight to place on boundary conditions in fitness evaluation
-	 * @param Boundary<T> boundary1					First boundary condition
-	 * @param Boundary<T> boundary2					Second boundary condition
+	 * @param std::function<const T(const T, const T, const T, const T) ode		The ordinary differential equation to compute; the first parameter is x, the second is f(x), the third is f'(x), the fourth is f''(x).
+	 * @param T rangeStart														Start of the range of points for which the functions will be evaluated
+	 * @param T rangeEnd														End of the range of points for which the functions will be evaluated
+	 * @param int numPoints														Number of points to distribute in the range at which the functions will be evaluated
+	 * @param T lambda															Extra parameter to control how much weight to place on boundary conditions in fitness evaluation
+	 * @param std::vector<Boundary<T>> boundaries								Boundary conditions
 	 */
-	Fitness(std::function<const T(const T, const T, const T)> ode, T rangeStart, T rangeEnd, int numPoints, T lambda, Boundary<T> boundary1, Boundary<T> boundary2)
-		: function(ode), rangeStart(rangeStart), rangeEnd(rangeEnd), numPoints(numPoints), lambda(lambda), boundary1(boundary1), boundary2(boundary2) {}
+	Fitness(std::function<const T(const T, const T, const T, const T)> ode, T rangeStart, T rangeEnd, int numPoints, T lambda, std::vector<Boundary<T>> boundaries) :
+		function(ode), rangeStart(rangeStart), rangeEnd(rangeEnd), numPoints(numPoints), lambda(lambda), boundaries(boundaries) {}
 
 	/**
 	 * Computes the fitness of a expression taken with respect to the given ODE
@@ -107,14 +106,16 @@ inline const T Fitness<T>::fitness(const ExpressionPtr<T>& y) const {
 	for (int i = 0; i < numPoints; ++i) {
 		T t = T(i) / T(numPoints-1); // 0..1 (inclusive)
 		T x = rangeStart + t * (rangeEnd - rangeStart); // rangeStart..rangeEnd
-		T result = function(y->evaluate(x), dy->evaluate(x), ddy->evaluate(x));
+		T result = function(x, y->evaluate(x), dy->evaluate(x), ddy->evaluate(x));
 		e += result * result;
 	}
 
 	// Compute the boundary conditions into the penalty
-	T b1 = boundary1.evaluate(y, dy, ddy);
-	T b2 = boundary2.evaluate(y, dy, ddy);
-	T p = lambda * (b1 * b1 + b2 * b2);
+	T p = 0;
+	for (auto& b : boundaries) {
+		T result = b.evaluate(y, dy, ddy);
+		p += result * result;
+	}
 
-	return e + p;
+	return e + lambda * p;
 }

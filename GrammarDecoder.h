@@ -5,6 +5,13 @@
 #include "VarX.h"
 
 
+// Helper macros to set up a grammar
+#define G2f(t) new GrammaticalElement2Args<t<float>, float>()
+#define G1f(t) new GrammaticalElement1Arg<t<float>, float>()
+#define G2d(t) new GrammaticalElement2Args<t<double>, double>()
+#define G1d(t) new GrammaticalElement1Arg<t<double>, double>()
+
+
 // Token class to denote an individual grammatical element, i.e. an operation that will take n parameters
 template<typename T>
 class GrammaticalElement_base {

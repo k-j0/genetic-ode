@@ -10,117 +10,53 @@
 #include "Logarithm.h"
 #include "GrammarDecoder.h"
 #include "Fitness.h"
+#include "Population.h"
+
 
 int main() {
 
-	// set up an ODE problem
-	std::function<const double(const double, const double, const double)> ode;
-	ode = [](const double y, const double dy, const double ddy) -> const double {
-		return ddy + 100 * y; // ODE:  y'' + 100y = 0
-	};
-	Boundary<double> boundary1 { 0, 0, 0 }; // y(0) = 0
-	Boundary<double> boundary2 { 0, 10, 1 }; // y'(0) = 10
-	Fitness<double> fitness(ode, 0, 1, 10, 100, boundary1, boundary2); // 10 points in [0,1]
 
-	// construct example expression exp(x) + sin(x)
-	ExpressionPtr<double> expr = AdditionPtrd(
-		ExponentialPtrd(VarXPtrd),
-		SinePtrd(VarXPtrd)
-	);
-	printf("Expression: y = %s\n\n", expr->toString().c_str());
-
-	double fitVal = fitness.fitness(expr);
-	printf("Fitness = %f\n\n", fitVal);
-
-	/*
 	// Set up grammar
-	std::vector<GrammaticalElement_base<float>*> operations = {
-		new GrammaticalElement2Args<Addition<float>, float>(),
-		new GrammaticalElement2Args<Subtraction<float>, float>(),
-		new GrammaticalElement2Args<Multiplication<float>, float>(),
-		new GrammaticalElement2Args<Division<float>, float>()
+	std::vector<GrammaticalElement_base<double>*> operations = {
+		G2d(Addition),
+		G2d(Subtraction),
+		G2d(Multiplication),
+		G2d(Division)
 	};
-	std::vector<GrammaticalElement_base<float>*> functions = {
-		new GrammaticalElement1Arg<Sine<float>, float>(),
-		new GrammaticalElement1Arg<Cosine<float>, float>(),
-		new GrammaticalElement1Arg<Exponential<float>, float>(),
-		new GrammaticalElement1Arg<Logarithm<float>, float>()
+	std::vector<GrammaticalElement_base<double>*> functions = {
+		G1d(Sine),
+		G1d(Cosine),
+		G1d(Exponential),
+		G1d(Logarithm)
 	};
-	GrammarDecoder<float> decoder(2, operations, functions);
-
-	// Decode test sequence
-	std::vector<unsigned int> sequence = { 1, 3, 0, 3, 2, 0, 2, 2, 2, 1 }; // test sequence - log(2xcosx)
-	ExpressionPtr<float> expression = decoder.decode(sequence);
-	if (expression == nullptr) {
-		printf("\n Invalid sequence decoded from test sequence...\n");
-	} else {
-		printf("\n Decoded sequence: %s\n", expression->toString().c_str());
-	}
-	
+	GrammarDecoder<double> decoder(2, operations, functions);
 
 
-	// Generate a number of test sequences to see how many turn out valid
-	printf("\n\n\nTesting 1000 sequences to check which ones are found valid...\n");
-	int size = 50;
-	int legal = 0;
-	srand(time(0));
-	for (int i = 0; i < 1000; ++i) {
-		std::vector<unsigned int> seq(size);
-		for (int j = 0; j < size; ++j) {
-			seq[j] = rand() % 1000;
+	// Set up an ODE problem
+	std::function<const double(const double, const double, const double, const double)> ode;
+	ode = [](const double x, const double y, const double dy, const double ddy) -> const double {
+		return x * ddy + (1.0 - x) * dy + y; // xy'' + (1 - x)y' + y = 0
+	};
+	std::vector<Boundary<double>> boundaries = {
+		{ 0, 1, 0 }, // y(0) = 1
+		{ 1, 0, 0 }, // y(1) = 0
+	};
+	Fitness<double> fitness(ode, 0.1, 1, 10, 100, boundaries); // 10 points in [0,1], lambda penalty = 100
+
+
+	// Initialize population
+	Population<double> population(1000, 50, 0.1f, 0.05f, &fitness, &decoder, time(nullptr));
+	double fit = INFINITY;
+	for (int i = 0; i < 2000; ++i) {
+		auto* top = population.nextGeneration();
+		if (top->fitness < fit) {
+			printf("Gen. %d \tfitness = %f: \ty = %s\n", i + 1, top->fitness, top->expression->toString().c_str());
+			fit = top->fitness;
 		}
-		ExpressionPtr<float> expr = decoder.decode(seq);
-		if (expr == nullptr) {
-			printf("\t[[ INVALID SEQUENCE ]]\n");
-		} else {
-			printf("\t- Decoded sequence: %s\n", expr->toString().c_str());
-			++legal;
+		if (top->fitness < 1e-7) {
+			break;
 		}
 	}
-	printf("\n %d out of 1000 randomly generated expressions were found valid (%d%%)\n", legal, legal/10);
-
-	
-
-	// Test computing derivatives of a test function set up via expressions
-	printf("\n\n\nTesting computed derivatives on pre-built expressions...\n");
-
-	// x^2
-	ExpressionPtr<float> xx = MultiplicationPtrf(VarXPtrf, VarXPtrf); // x * x
-	// x^3
-	ExpressionPtr<float> xxx = MultiplicationPtrf(xx, VarXPtrf); // x^2 * x
-
-	// 4x^3 + 3x^2 - 6x + 7
-	ExpressionPtr<float> polynomial = AdditionPtrf(
-		AdditionPtrf(
-			MultiplicationPtrf(ConstantPtrf(4), xxx), // 4x^3
-			// +
-			MultiplicationPtrf(ConstantPtrf(3), xx) // 3x^2
-		),
-			// +
-		AdditionPtrf(
-			MultiplicationPtrf(ConstantPtrf(-6), VarXPtrf), // -6x
-			// +
-			ConstantPtrf(7) // 7
-		)
-	);
-
-	// log( 4x^3 + 3x^2 - 6x + 7 )
-	ExpressionPtr<float> logPolynomial = LogarithmPtrf(polynomial);
-
-	// cos( log( 4x^3 + 3x^2 - 6x + 7 ) )
-	ExpressionPtr<float> cosLogPolynomial = CosinePtrf(polynomial);
-
-	// exp( cos( log( 4x^3 + 3x^2 - 6x + 7 ) ) )
-	ExpressionPtr<float> expCosLogPolynomial = ExponentialPtrf(cosLogPolynomial);
-
-	ExpressionPtr<float> expr = expCosLogPolynomial;
-	printf("\n f(x) = %s\n", expr->toString().c_str());
-	printf("\n f(0) = %f\n", expr->evaluate(0));
-	printf("\n f(1) = %f\n", expr->evaluate(1));
-	printf("\n f'(x) = %s\n", expr->derivative()->simplify()->toString().c_str());
-	printf("\n f''(x) = %s\n", expr->derivative()->derivative()->simplify()->toString().c_str());
-	printf("\n f'''(x) = %s\n", expr->derivative()->derivative()->derivative()->simplify()->toString().c_str());
-	*/
 
 	return 0;
 }
