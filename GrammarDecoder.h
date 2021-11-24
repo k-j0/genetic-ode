@@ -222,8 +222,8 @@ inline bool GrammarDecoder<T>::decodeConstant(const std::vector<unsigned int>& s
 		}
 	}
 
-	// one of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 as a constant
-	outConstant = ConstantPtr(T, head % 10);
+	// one of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 as a constant, or negative variations
+	outConstant = ConstantPtr(T, head % 20 - 10);
 
 	return true;
 }

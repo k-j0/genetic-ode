@@ -132,10 +132,10 @@ inline const Chromosome<T>* Population<T>::nextGeneration() {
 		return a.fitness < b.fitness;
 	});
 
-	unsigned int crossoverCount = int((1 - replicationRate) * chromosomes.size());
+	unsigned int parentCount = int(replicationRate * chromosomes.size());
 	unsigned int monsterCount = int(randomMonsters * chromosomes.size());
-	int parentCount = chromosomes.size() - crossoverCount - monsterCount;
-	assert(parentCount > 0);
+	int crossoverCount = chromosomes.size() - monsterCount - parentCount;
+	assert(crossoverCount > 0);
 	assert(parentCount < chromosomes.size());
 	assert(crossoverCount < chromosomes.size());
 	assert(monsterCount < chromosomes.size());
@@ -166,7 +166,7 @@ inline const Chromosome<T>* Population<T>::nextGeneration() {
 		parent2->parent = true;
 	}
 
-	// Create monsters
+	// Create "monsters", i.e. completely random chromosomes
 	for (size_t i = parentCount; i < parentCount + monsterCount; ++i) {
 		for (size_t j = 0; j < chromosomes[i].genes.size(); ++j) {
 			chromosomes[i].genes[j] = rand() % maxGeneValue;

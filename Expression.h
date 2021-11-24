@@ -46,11 +46,12 @@ using ExpressionPtr = const std::shared_ptr<Expression<T>>;
 template<typename T>
 class Constant : public Expression<T> {
 private:
-	int v;
+	T v;
 
 public:
 
-	Constant(int v) : v(v) {}
+	Constant(T v) : v(v) {}
+	Constant(int v) : v(T(v)) {}
 
 	T evaluate(T x) const override;
 
@@ -71,7 +72,7 @@ public:
 
 template<typename T>
 inline T Constant<T>::evaluate(T x) const {
-	return T(v);
+	return v;
 }
 
 template<typename T>
