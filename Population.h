@@ -44,6 +44,11 @@ private:
 	float mutationRate;
 
 	/**
+	 * Portion of the population that will be shuffled completely
+	 */
+	float randomMonsters;
+
+	/**
 	 * Maximum value a gene is allowed to be assigned
 	 */
 	int maxGeneValue;
@@ -68,7 +73,7 @@ public:
 	/**
 	 * Default constructor; initializes the population with random values for all of the genes
 	 */
-	Population(unsigned int n, unsigned int geneCount, float replicationRate, float mutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed = 0, unsigned int maxGeneValue = 255);
+	Population(unsigned int n, unsigned int geneCount, float replicationRate, float mutationRate, float randomMonsters, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed = 0, unsigned int maxGeneValue = 255);
 
 	/**
 	 * Run through a single generation of the population
@@ -81,8 +86,8 @@ public:
 
 
 template<typename T>
-inline Population<T>::Population(unsigned int n, unsigned int geneCount, float replicationRate, float mutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed, unsigned int maxGeneValue) :
-				replicationRate(replicationRate), mutationRate(mutationRate), fitnessFunction(fitnessFunction), decoder(decoder), maxGeneValue(maxGeneValue) {
+inline Population<T>::Population(unsigned int n, unsigned int geneCount, float replicationRate, float mutationRate, float randomMonsters, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed, unsigned int maxGeneValue) :
+				replicationRate(replicationRate), mutationRate(mutationRate), randomMonsters(randomMonsters), fitnessFunction(fitnessFunction), decoder(decoder), maxGeneValue(maxGeneValue) {
 
 	srand(seed);
 
@@ -127,13 +132,20 @@ inline const Chromosome<T>* Population<T>::nextGeneration() {
 		return a.fitness < b.fitness;
 	});
 
-	// Create crossovers
 	unsigned int crossoverCount = int((1 - replicationRate) * chromosomes.size());
+	unsigned int monsterCount = int(randomMonsters * chromosomes.size());
+	int parentCount = chromosomes.size() - crossoverCount - monsterCount;
+	assert(parentCount > 0);
+	assert(parentCount < chromosomes.size());
+	assert(crossoverCount < chromosomes.size());
+	assert(monsterCount < chromosomes.size());
+
+	// Create crossovers
 	for (size_t i = 0; i < crossoverCount / 2; ++i) { // 2 by 2, since each pair of parents creates a pair of children
 		Chromosome<T>* child1 = &chromosomes[chromosomes.size() - 1 - 2 * i];
 		Chromosome<T>* child2 = &chromosomes[chromosomes.size() - 2 - 2 * i];
 		Chromosome<T>* parent1 = &chromosomes[0]; // one of the parents is always the best performer in the population
-		Chromosome<T>* parent2 = &chromosomes[chromosomes.size() - 2 * int(crossoverCount / 2) - 1]; // worst possible parent
+		Chromosome<T>* parent2 = &chromosomes[parentCount - 1]; // worst possible parent
 		for (int j = 1; j < chromosomes.size() - 2 * int(crossoverCount / 2) - 2; ++j) {
 			// for each chromosome between parent1 and parent2, there's a 50-50 chance that they will replace parent2
 			// this mimics the exact behaviour described in the original paper, without the hassle of splitting the population into K groups
@@ -152,6 +164,13 @@ inline const Chromosome<T>* Population<T>::nextGeneration() {
 		// mark parents as not being allowed to mutate
 		parent1->parent = true;
 		parent2->parent = true;
+	}
+
+	// Create monsters
+	for (size_t i = parentCount; i < parentCount + monsterCount; ++i) {
+		for (size_t j = 0; j < chromosomes[i].genes.size(); ++j) {
+			chromosomes[i].genes[j] = rand() % maxGeneValue;
+		}
 	}
 
 	// Create mutations

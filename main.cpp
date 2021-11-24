@@ -29,23 +29,24 @@ int main() {
 		G1d(Exponential),
 		G1d(Logarithm)
 	};
-	GrammarDecoder<double> decoder(2, operations, functions);
+	GrammarDecoder<double> decoder(0, operations, functions);
 
 
 	// Set up an ODE problem
 	std::function<const double(const double, const double, const double, const double)> ode;
 	ode = [](const double x, const double y, const double dy, const double ddy) -> const double {
-		return x * ddy + (1.0 - x) * dy + y; // xy'' + (1 - x)y' + y = 0
+		
+		return (2 * x - y) / x - dy;
+		//return x * ddy + (1.0 - x) * dy + y; // xy'' + (1 - x)y' + y = 0
 	};
 	std::vector<Boundary<double>> boundaries = {
-		{ 0, 1, 0 }, // y(0) = 1
-		{ 1, 0, 0 }, // y(1) = 0
+		{ 0.1, 20.1, 0 }, // y(0.1) = 20.1
 	};
-	Fitness<double> fitness(ode, 0.1, 1, 10, 100, boundaries); // 10 points in [0,1], lambda penalty = 100
+	Fitness<double> fitness(ode, 0.1, 1, 50, 100, boundaries); // lambda penalty = 100
 
 
 	// Initialize population
-	Population<double> population(1000, 50, 0.1f, 0.05f, &fitness, &decoder, time(nullptr));
+	Population<double> population(1000, 50, 0.1f, 0.1f, 0.01f, &fitness, &decoder, time(nullptr));
 	double fit = INFINITY;
 	for (int i = 0; i < 2000; ++i) {
 		auto* top = population.nextGeneration();
