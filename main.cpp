@@ -39,11 +39,11 @@ int main() {
 
 
 	// Generate a number of test sequences to see how many turn out valid
-	printf("\n\n\nTesting 10000 sequences to check which ones are found valid...\n");
+	printf("\n\n\nTesting 1000 sequences to check which ones are found valid...\n");
 	int size = 50;
 	int legal = 0;
 	srand(time(0));
-	for (int i = 0; i < 10000; ++i) {
+	for (int i = 0; i < 1000; ++i) {
 		std::vector<unsigned int> seq(size);
 		for (int j = 0; j < size; ++j) {
 			seq[j] = rand() % 1000;
@@ -56,8 +56,7 @@ int main() {
 			++legal;
 		}
 	}
-	printf("\n %d out of 10000 randomly generated expressions were found valid (%d%%)\n", legal, legal/100);
-	return 0;
+	printf("\n %d out of 1000 randomly generated expressions were found valid (%d%%)\n", legal, legal/10);
 
 
 
