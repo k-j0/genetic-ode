@@ -9,9 +9,30 @@
 #include "Exponential.h"
 #include "Logarithm.h"
 #include "GrammarDecoder.h"
+#include "Fitness.h"
 
 int main() {
 
+	// set up an ODE problem
+	std::function<const double(const double, const double, const double)> ode;
+	ode = [](const double y, const double dy, const double ddy) -> const double {
+		return ddy + 100 * y; // ODE:  y'' + 100y = 0
+	};
+	Boundary<double> boundary1 { 0, 0, 0 }; // y(0) = 0
+	Boundary<double> boundary2 { 0, 10, 1 }; // y'(0) = 10
+	Fitness<double> fitness(ode, 0, 1, 10, 100, boundary1, boundary2); // 10 points in [0,1]
+
+	// construct example expression exp(x) + sin(x)
+	ExpressionPtr<double> expr = AdditionPtrd(
+		ExponentialPtrd(VarXPtrd),
+		SinePtrd(VarXPtrd)
+	);
+	printf("Expression: y = %s\n\n", expr->toString().c_str());
+
+	double fitVal = fitness.fitness(expr);
+	printf("Fitness = %f\n\n", fitVal);
+
+	/*
 	// Set up grammar
 	std::vector<GrammaticalElement_base<float>*> operations = {
 		new GrammaticalElement2Args<Addition<float>, float>(),
@@ -35,7 +56,7 @@ int main() {
 	} else {
 		printf("\n Decoded sequence: %s\n", expression->toString().c_str());
 	}
-
+	
 
 
 	// Generate a number of test sequences to see how many turn out valid
@@ -58,7 +79,7 @@ int main() {
 	}
 	printf("\n %d out of 1000 randomly generated expressions were found valid (%d%%)\n", legal, legal/10);
 
-
+	
 
 	// Test computing derivatives of a test function set up via expressions
 	printf("\n\n\nTesting computed derivatives on pre-built expressions...\n");
@@ -99,6 +120,7 @@ int main() {
 	printf("\n f'(x) = %s\n", expr->derivative()->simplify()->toString().c_str());
 	printf("\n f''(x) = %s\n", expr->derivative()->derivative()->simplify()->toString().c_str());
 	printf("\n f'''(x) = %s\n", expr->derivative()->derivative()->derivative()->simplify()->toString().c_str());
+	*/
 
 	return 0;
 }

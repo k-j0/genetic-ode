@@ -24,6 +24,7 @@ public:
 };
 #define SubtractionPtr(T, a, b) ExpressionPtr<T>(new Subtraction<T>(a, b))
 #define SubtractionPtrf(a, b) SubtractionPtr(float, a, b)
+#define SubtractionPtrd(a, b) SubtractionPtr(double, a, b)
 
 
 

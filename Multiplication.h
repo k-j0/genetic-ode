@@ -23,6 +23,7 @@ public:
 };
 #define MultiplicationPtr(T, a, b) ExpressionPtr<T>(new Multiplication<T>(a, b))
 #define MultiplicationPtrf(a, b) MultiplicationPtr(float, a, b)
+#define MultiplicationPtrd(a, b) MultiplicationPtr(double, a, b)
 
 
 

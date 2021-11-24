@@ -24,6 +24,7 @@ public:
 };
 #define SinePtr(T, a) ExpressionPtr<T>(new Sine<T>(a))
 #define SinePtrf(a) SinePtr(float, a)
+#define SinePtrd(a) SinePtr(double, a)
 
 template<typename T>
 class Cosine : public Expression<T> {
@@ -46,6 +47,7 @@ public:
 };
 #define CosinePtr(T, a) ExpressionPtr<T>(new Cosine<T>(a))
 #define CosinePtrf(a) CosinePtr(float, a)
+#define CosinePtrd(a) CosinePtr(double, a)
 
 
 

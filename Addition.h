@@ -23,6 +23,7 @@ public:
 };
 #define AdditionPtr(T, a, b) ExpressionPtr<T>(new Addition<T>(a, b))
 #define AdditionPtrf(a, b) AdditionPtr(float, a, b)
+#define AdditionPtrd(a, b) AdditionPtr(double, a, b)
 
 
 

@@ -25,6 +25,7 @@ public:
 };
 #define DivisionPtr(T, a, b) ExpressionPtr<T>(new Division<T>(a, b))
 #define DivisionPtrf(a, b) DivisionPtr(float, a, b)
+#define DivisionPtrd(a, b) DivisionPtr(double, a, b)
 
 
 

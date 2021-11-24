@@ -64,6 +64,7 @@ public:
 };
 #define ConstantPtr(T, v) ExpressionPtr<T>(new Constant<T>(v))
 #define ConstantPtrf(v) ConstantPtr(float, v)
+#define ConstantPtrd(v) ConstantPtr(double, v)
 
 
 

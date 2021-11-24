@@ -146,6 +146,7 @@
     <ClInclude Include="Division.h" />
     <ClInclude Include="Exponential.h" />
     <ClInclude Include="Expression.h" />
+    <ClInclude Include="Fitness.h" />
     <ClInclude Include="GrammarDecoder.h" />
     <ClInclude Include="Logarithm.h" />
     <ClInclude Include="Multiplication.h" />

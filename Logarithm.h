@@ -25,6 +25,7 @@ public:
 };
 #define LogarithmPtr(T, a) ExpressionPtr<T>(new Logarithm<T>(a))
 #define LogarithmPtrf(a) LogarithmPtr(float, a)
+#define LogarithmPtrd(a) LogarithmPtr(double, a)
 
 
 

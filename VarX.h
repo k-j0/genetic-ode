@@ -19,6 +19,7 @@ public:
 };
 #define VarXPtr(T) ExpressionPtr<T>(new VarX<T>())
 #define VarXPtrf VarXPtr(float)
+#define VarXPtrd VarXPtr(double)
 
 
 

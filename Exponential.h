@@ -24,6 +24,7 @@ public:
 };
 #define ExponentialPtr(T, a) ExpressionPtr<T>(new Exponential<T>(a))
 #define ExponentialPtrf(a) ExponentialPtr(float, a)
+#define ExponentialPtrd(a) ExponentialPtr(double, a)
 
 
 
