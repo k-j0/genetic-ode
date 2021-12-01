@@ -9,7 +9,6 @@ The project can be opened and built as is with Visual Studio 2019 on Windows. No
 
 ## Todo
 
-- Implement power expressions a(x)^{b(x)}
 - Support & test PDE problems
 - Try alternative chromosome representation with chromosomes being the expression trees themselves instead of decodable sequences of integers - genetic rules will need to be modified accordingly, to:
     - A probability of each individual node being modified (+ -> -, 5 -> 5.4, sin -> cos, etc.)

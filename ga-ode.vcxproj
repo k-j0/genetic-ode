@@ -152,6 +152,7 @@
     <ClInclude Include="Logarithm.h" />
     <ClInclude Include="Multiplication.h" />
     <ClInclude Include="Population.h" />
+    <ClInclude Include="Power.h" />
     <ClInclude Include="Subtraction.h" />
     <ClInclude Include="Trig.h" />
     <ClInclude Include="VarX.h" />

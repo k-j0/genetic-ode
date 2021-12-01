@@ -1,16 +1,6 @@
 #pragma once
 
-#include "VarX.h"
-#include "Addition.h"
-#include "Multiplication.h"
-#include "Division.h"
-#include "Subtraction.h"
-#include "Trig.h"
-#include "Exponential.h"
-#include "Logarithm.h"
-#include "GrammarDecoder.h"
 #include "Fitness.h"
-#include "Population.h"
 
 
 /// Example ODEs from the original paper

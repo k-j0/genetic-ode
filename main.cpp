@@ -1,6 +1,17 @@
 
 #include <ctime>
 #include <thread>
+#include "VarX.h"
+#include "Addition.h"
+#include "Multiplication.h"
+#include "Division.h"
+#include "Subtraction.h"
+#include "Trig.h"
+#include "Exponential.h"
+#include "Logarithm.h"
+#include "Power.h"
+#include "GrammarDecoder.h"
+#include "Population.h"
 #include "ExampleODEs.h"
 
 
@@ -47,7 +58,8 @@ int main() {
 		G2d(Addition),
 		G2d(Subtraction),
 		G2d(Multiplication),
-		G2d(Division)
+		G2d(Division),
+		G2d(Power)
 	};
 	std::vector<GrammaticalElement_base<double>*> functions = {
 		G1d(Sine),
