@@ -53,7 +53,7 @@ Fitness<double> ode4() {
 		0, 1, 10, 100,
 		{
 			{ 0, 0, 0 },
-			{ 0, 0, 1 }
+			{ 0, 10, 1 }
 		});
 }
 
@@ -105,6 +105,20 @@ Fitness<double> ode9() {
 			{ 0, 0, 0 },
 			{ 1, sin(1) / exp(0.2), 0 }
 		});
+}
+
+Fitness<double> getExampleODE(int n) {
+	switch (n) {
+	case 2: return ode2();
+	case 3: return ode3();
+	case 4: return ode4();
+	case 5: return ode5();
+	case 6: return ode6();
+	case 7: return ode7();
+	case 8: return ode8();
+	case 9: return ode9();
+	default: return ode1();
+	}
 }
 
 #undef ODE

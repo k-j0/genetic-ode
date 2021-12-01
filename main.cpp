@@ -1,5 +1,6 @@
 
 #include <ctime>
+#include <thread>
 #include "ExampleODEs.h"
 
 
@@ -15,11 +16,15 @@ void solveEx(std::string name, Fitness<double> fitnessFunction, int seed, bool v
 	const Chromosome<double>* top = nullptr;
 	int gen;
 	double fitness = INFINITY;
-	for (gen = 1; gen <= 1000; ++gen) {
+	std::shared_ptr<Expression<double>> bestExpression = nullptr;
+	for (gen = 1; gen <= 4000; ++gen) {
 		top = population.nextGeneration();
-		if (verbose && top && top->fitness < fitness) {
+		if (top && top->fitness < fitness) {
 			fitness = top->fitness;
-			printf("%s \tGen. %d, \tfitness %f, \ty(x) = %s\n", name.c_str(), gen, fitness, top->expression->toString().c_str());
+			bestExpression = top->expression;
+			if (verbose) {
+				printf("%s \tGen. %d, \tfitness %f, \ty(x) = %s\n", name.c_str(), gen, fitness, top->expression->toString().c_str());
+			}
 		}
 		if (top && top->fitness < 1e-7) {
 			break;
@@ -30,7 +35,7 @@ void solveEx(std::string name, Fitness<double> fitnessFunction, int seed, bool v
 	if (!top) {
 		printf("Could not solve %s, null result.\n\n", name.c_str());
 	} else {
-		printf("Finished solving %s in %d generations: \tfitness %f, \ty(x) = %s\n\n", name.c_str(), gen, top->fitness, top->expression->toString().c_str());
+		printf("Finished solving %s in %d generations: \tfitness %f, \ty(x) = %s\n\n", name.c_str(), gen, fitness, bestExpression->toString().c_str());
 	}
 }
 
@@ -53,10 +58,14 @@ int main() {
 	decoder = new GrammarDecoder<double>(0, operations, functions);
 
 	// solve examples
-	solveEx("ODE1", ode1(), 1, true);
-	solveEx("ODE2", ode2(), 2, true);
-	solveEx("ODE8", ode8(), 8, true);
-
+	std::vector<std::thread*> threads;
+	for (int i = 1; i <= 9; ++i) {
+		threads.push_back(new std::thread(solveEx, "ODE" + std::to_string(i), getExampleODE(i), i, false));
+	}
+	for (auto it = threads.begin(); it != threads.end(); it++) {
+		(*it)->join();
+		delete *it;
+	}
 	
 	delete decoder;
 

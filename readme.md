@@ -9,7 +9,6 @@ The project can be opened and built as is with Visual Studio 2019 on Windows. No
 
 ## Todo
 
-- Provide library of ODE problems from the original paper
 - Support throwing exceptions from expression evaluations, e.g. for divisions by zero, logarithms of negative numbers, etc.
 - Implement power expressions a(x)^{b(x)}
 - Support & test PDE problems
