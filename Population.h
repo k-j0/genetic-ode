@@ -3,9 +3,12 @@
 #include <cassert>
 #include <vector>
 #include <algorithm>
+#include <random>
 #include "GrammarDecoder.h"
 #include "Fitness.h"
 #include "Expression.h"
+
+#define rand int(abs(rng()))
 
 
 /**
@@ -27,6 +30,10 @@ class Population {
 
 private:
 
+	/**
+	 * Random number generator to use for the population
+	 */
+	std::mt19937 rng;
 
 	/**
 	 * Gives the number of generations that the population has gone through
@@ -89,7 +96,7 @@ template<typename T>
 inline Population<T>::Population(unsigned int n, unsigned int geneCount, float replicationRate, float mutationRate, float randomMonsters, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed, unsigned int maxGeneValue) :
 				replicationRate(replicationRate), mutationRate(mutationRate), randomMonsters(randomMonsters), fitnessFunction(fitnessFunction), decoder(decoder), maxGeneValue(maxGeneValue) {
 
-	srand(seed);
+	rng = std::mt19937(seed);
 
 	assert(n >= 2);
 	assert(geneCount >= 2);
@@ -103,7 +110,7 @@ inline Population<T>::Population(unsigned int n, unsigned int geneCount, float r
 	for (int i = 0; i < n; ++i) {
 		chromosomes[i].genes = std::vector<unsigned int>(geneCount);
 		for (int j = 0; j < geneCount; ++j) {
-			chromosomes[i].genes[j] = rand() % maxGeneValue;
+			chromosomes[i].genes[j] = rand % maxGeneValue;
 		}
 	}
 
@@ -150,13 +157,13 @@ inline const Chromosome<T>* Population<T>::nextGeneration() {
 			// for each chromosome between parent1 and parent2, there's a 50-50 chance that they will replace parent2
 			// this mimics the exact behaviour described in the original paper, without the hassle of splitting the population into K groups
 			// the parents are always the top performer and the best performer out of a random half of the full population
-			if (rand() % 2 == 0) {
+			if (rand % 2 == 0) {
 				parent2 = &chromosomes[j];
 				break;
 			}
 		}
 		// set up crossover; child 1 will get the first n genes from parent 1 and the last bit from parent 2, and inversely for chromosome 2
-		int crossoverPosition = 1 + rand() % (parent1->genes.size() - 1);
+		int crossoverPosition = 1 + rand % (parent1->genes.size() - 1);
 		for (size_t j = 0; j < parent1->genes.size(); ++j) {
 			child1->genes[j] = (j < crossoverPosition ? parent1 : parent2)->genes[j];
 			child2->genes[j] = (j < crossoverPosition ? parent2 : parent1)->genes[j];
@@ -169,7 +176,7 @@ inline const Chromosome<T>* Population<T>::nextGeneration() {
 	// Create "monsters", i.e. completely random chromosomes
 	for (size_t i = parentCount; i < parentCount + monsterCount; ++i) {
 		for (size_t j = 0; j < chromosomes[i].genes.size(); ++j) {
-			chromosomes[i].genes[j] = rand() % maxGeneValue;
+			chromosomes[i].genes[j] = rand % maxGeneValue;
 		}
 	}
 
@@ -177,8 +184,8 @@ inline const Chromosome<T>* Population<T>::nextGeneration() {
 	for (auto& ch : chromosomes) {
 		if (ch.parent) continue; // parents aren't allowed to mutate, which ensures we keep them in the pool for the next generation as-is
 		for (size_t i = 0; i < ch.genes.size(); ++i) {
-			if (rand() % 100000 > int(mutationRate * 100000)) {
-				ch.genes[i] = rand() % maxGeneValue; // randomly re-assign this gene
+			if (rand % 100000 > int(mutationRate * 100000)) {
+				ch.genes[i] = rand % maxGeneValue; // randomly re-assign this gene
 			}
 		}
 	}

@@ -40,17 +40,19 @@ int main() {
 	std::vector<Boundary<double>> boundaries = {
 		{ 0, 0, 0 }
 	};
-	Fitness<double> fitness(ode, 0, 1, 50, 80, boundaries); // lambda penalty = 80
+	Fitness<double> fitness(ode, 0, 1, 10, 100, boundaries);
 
 	// Initialize population
-	Population<double> population(5000, 50, 0.1f, 0.1f, 0.1f, &fitness, &decoder, time(nullptr));
+	Population<double> population(1000, 50, 0.1f, 0.1f, 0.1f, &fitness, &decoder, time(nullptr));
 	double fit = INFINITY;
 	const Chromosome<double>* top = nullptr;
-	for (int i = 0; i < 2000; ++i) {
+	for (int i = 0; i < 500; ++i) {
 		top = population.nextGeneration();
 		if (top->fitness < fit) {
 			printf("Gen. %d \tfitness = %f: \ty = %s\n", i + 1, top->fitness, top->expression->toString().c_str());
 			fit = top->fitness;
+		} else if ((i + 1) % 100 == 0) {
+			printf("Gen. %d\n", i + 1);
 		}
 		if (top->fitness < 1e-7) {
 			break;
