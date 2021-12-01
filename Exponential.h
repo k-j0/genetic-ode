@@ -30,7 +30,7 @@ public:
 
 template<typename T>
 inline T Exponential<T>::evaluate(T x) const {
-	return exp(x);
+	return exp(a->evaluate(x));
 }
 
 template<typename T>

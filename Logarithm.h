@@ -31,7 +31,7 @@ public:
 
 template<typename T>
 inline T Logarithm<T>::evaluate(T x) const {
-	return log(x);
+	return log(a->evaluate(x));
 }
 
 template<typename T>

@@ -35,32 +35,15 @@ int main() {
 	// Set up an ODE problem
 	std::function<const double(const double, const double, const double, const double)> ode;
 	ode = [](const double x, const double y, const double dy, const double ddy) -> const double {
-		return dy + 0.2 * y - exp(-x / 5.0) * cos(x);
+		return -dy - y/5.0 + exp(-x / 5.0) * cos(x);
 	};
 	std::vector<Boundary<double>> boundaries = {
 		{ 0, 0, 0 }
 	};
-	Fitness<double> fitness(ode, 0, 1, 50, 100, boundaries); // lambda penalty = 100
-
-	// why is the fitness for the following expression so high? it should be 0!
-	ExpressionPtr<double> expr = MultiplicationPtrd(
-		ExponentialPtrd(
-			DivisionPtrd(
-				VarXPtrd,
-				ConstantPtrd(-5)
-			)
-		),
-		SinePtrd(
-			VarXPtrd
-		)
-	);
-
-	printf("Expression: y = %s\n", expr->toString().c_str());
-	printf("Fitness: %f\n", fitness.fitness(expr));
-	return 0;
+	Fitness<double> fitness(ode, 0, 1, 50, 80, boundaries); // lambda penalty = 80
 
 	// Initialize population
-	Population<double> population(5000, 50, 0.1f, 0.15f, 0.05f, &fitness, &decoder, time(nullptr));
+	Population<double> population(5000, 50, 0.1f, 0.1f, 0.1f, &fitness, &decoder, time(nullptr));
 	double fit = INFINITY;
 	const Chromosome<double>* top = nullptr;
 	for (int i = 0; i < 2000; ++i) {

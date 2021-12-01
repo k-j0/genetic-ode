@@ -54,7 +54,7 @@ public:
 
 template<typename T>
 inline T Sine<T>::evaluate(T x) const {
-	return sin(x);
+	return sin(a->evaluate(x));
 }
 
 template<typename T>
@@ -73,7 +73,7 @@ inline ExpressionPtr<T> Sine<T>::simplify() const {
 
 template<typename T>
 inline T Cosine<T>::evaluate(T x) const {
-	return cos(x);
+	return cos(a->evaluate(x));
 }
 
 template<typename T>
