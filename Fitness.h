@@ -113,6 +113,10 @@ inline const T Fitness<T>::fitness(const ExpressionPtr<T>& y) const {
 	// Compute the boundary conditions into the penalty
 	T p = 0;
 	for (auto& b : boundaries) {
+		if (b.x < rangeStart || b.x > rangeEnd) {
+			printf("Warning: boundary condition is outside domain; x = %f, domain is [%f, %f]!\n", b.x, rangeStart, rangeEnd);
+			exit(-1);
+		}
 		T result = b.evaluate(y, dy, ddy);
 		p += result * result;
 	}
