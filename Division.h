@@ -31,7 +31,11 @@ public:
 
 template<typename T>
 inline T Division<T>::evaluate(T x) const {
-	return a->evaluate(x) / b->evaluate(x);
+	T denominator = b->evaluate(x);
+	if (denominator == 0) {
+		throw NAN;
+	}
+	return a->evaluate(x) / denominator;
 }
 
 template<typename T>

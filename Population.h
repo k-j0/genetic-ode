@@ -129,8 +129,13 @@ inline const Chromosome<T>* Population<T>::nextGeneration() {
 		if (ch.expression == nullptr) {
 			ch.fitness = INFINITY; // invalid expression, definitely don't want to keep this one
 		} else {
-			ch.expression = ch.expression->simplify();
-			ch.fitness = fitnessFunction->fitness(ch.expression);
+			try {
+				ch.expression = ch.expression->simplify();
+				ch.fitness = fitnessFunction->fitness(ch.expression);
+			} catch (...) { // handle invalid expressions with /0, log(-1), etc.
+				ch.expression = nullptr;
+				ch.fitness = INFINITY;
+			}
 		}
 	}
 

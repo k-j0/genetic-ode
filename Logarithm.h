@@ -31,7 +31,11 @@ public:
 
 template<typename T>
 inline T Logarithm<T>::evaluate(T x) const {
-	return log(a->evaluate(x));
+	T inner = a->evaluate(x);
+	if (inner <= 0) {
+		throw NAN;
+	}
+	return log(inner);
 }
 
 template<typename T>
