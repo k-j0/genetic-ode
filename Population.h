@@ -18,8 +18,8 @@ template<typename T>
 struct Chromosome {
 	std::vector<unsigned int> genes; // individual genes that make up the chromosome
 	std::shared_ptr<Expression<T>> expression = nullptr; // the expression represented by the chromosome
-	T fitness; // last fitness value computed for the chromosome
-	bool parent; // whether the chromosome was a parent in the given generation
+	T fitness = INFINITY; // last fitness value computed for the chromosome
+	bool parent = false; // whether the chromosome was a parent in the given generation
 };
 
 /**

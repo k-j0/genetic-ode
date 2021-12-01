@@ -11,9 +11,9 @@ public:
 
 	Sine(ExpressionPtr<T> a) : a(a) {}
 
-	T evaluate(T x) const override;
+	T evaluate(T x, T y) const override;
 
-	ExpressionPtr<T> derivative() const override;
+	ExpressionPtr<T> derivative(int dimension) const override;
 
 	ExpressionPtr<T> simplify() const override;
 
@@ -34,9 +34,9 @@ public:
 
 	Cosine(ExpressionPtr<T> a) : a(a) {}
 
-	T evaluate(T x) const override;
+	T evaluate(T x, T y) const override;
 
-	ExpressionPtr<T> derivative() const override;
+	ExpressionPtr<T> derivative(int dimension) const override;
 
 	ExpressionPtr<T> simplify() const override;
 
@@ -53,40 +53,40 @@ public:
 
 
 template<typename T>
-inline T Sine<T>::evaluate(T x) const {
-	return sin(a->evaluate(x));
+inline T Sine<T>::evaluate(T x, T y) const {
+	return sin(a->evaluate(x, y));
 }
 
 template<typename T>
-inline ExpressionPtr<T> Sine<T>::derivative() const {
+inline ExpressionPtr<T> Sine<T>::derivative(int dimension) const {
 	// sin'(a) = a' cos(a)
-	return MultiplicationPtr(T, a->derivative(), CosinePtr(T, a));
+	return MultiplicationPtr(T, a->derivative(dimension), CosinePtr(T, a));
 }
 
 template<typename T>
 inline ExpressionPtr<T> Sine<T>::simplify() const {
 	if (a->isConstant()) {
-		return ConstantPtr(T, sin(a->evaluate(0)));
+		return ConstantPtr(T, sin(a->evaluate(0, 0)));
 	}
 	return SinePtr(T, a->simplify());
 }
 
 template<typename T>
-inline T Cosine<T>::evaluate(T x) const {
-	return cos(a->evaluate(x));
+inline T Cosine<T>::evaluate(T x, T y) const {
+	return cos(a->evaluate(x, y));
 }
 
 template<typename T>
-inline ExpressionPtr<T> Cosine<T>::derivative() const {
+inline ExpressionPtr<T> Cosine<T>::derivative(int dimension) const {
 	// cos'(a) = -a' sin(a)
-	auto minusAPrime = MultiplicationPtr(T, ConstantPtr(T, -1), a->derivative());
+	auto minusAPrime = MultiplicationPtr(T, ConstantPtr(T, -1), a->derivative(dimension));
 	return MultiplicationPtr(T, minusAPrime, SinePtr(T, a));
 }
 
 template<typename T>
 inline ExpressionPtr<T> Cosine<T>::simplify() const {
 	if (a->isConstant()) {
-		return ConstantPtr(T, cos(a->evaluate(0)));
+		return ConstantPtr(T, cos(a->evaluate(0, 0)));
 	}
 	return CosinePtr(T, a->simplify());
 }

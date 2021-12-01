@@ -1,31 +1,53 @@
 #pragma once
 
 #include <vector>
+#include <cassert>
 #include "Expression.h"
-#include "VarX.h"
 
 
 // Helper macros to set up a grammar
 #define G2f(t) new GrammaticalElement2Args<t<float>, float>()
 #define G1f(t) new GrammaticalElement1Arg<t<float>, float>()
+#define Gf(t) new GrammaticalElement0Args<t<float>, float>()
 #define G2d(t) new GrammaticalElement2Args<t<double>, double>()
 #define G1d(t) new GrammaticalElement1Arg<t<double>, double>()
+#define Gd(t) new GrammaticalElement0Args<t<double>, double>()
 
 
 // Token class to denote an individual grammatical element, i.e. an operation that will take n parameters
 template<typename T>
 class GrammaticalElement_base {
 public:
+	virtual const ExpressionPtr<T> instantiate0Args() = 0;
 	virtual const ExpressionPtr<T> instantiate1Arg(const std::shared_ptr<Expression<T>> a) = 0;
 	virtual const ExpressionPtr<T> instantiate2Args(const std::shared_ptr<Expression<T>> a, const std::shared_ptr<Expression<T>> b) = 0;
 };
 
 template<typename ChildExpression, typename T>
+class GrammaticalElement0Args : public GrammaticalElement_base<T> {
+public:
+	/**
+	 * Creates an instance of the templated expression type; either the 0-, 1- or 2-arguments version should be called, depending on what the expression type expects
+	 */
+	const ExpressionPtr<T> instantiate0Args() override {
+		return std::shared_ptr<ChildExpression>(new ChildExpression());
+	}
+	const ExpressionPtr<T> instantiate1Arg(const std::shared_ptr<Expression<T>> a) override {
+		return nullptr;
+	}
+	const ExpressionPtr<T> instantiate2Args(const std::shared_ptr<Expression<T>> a, const std::shared_ptr<Expression<T>> b) override {
+		return nullptr;
+	}
+}; // class GrammaticalElement0Args
+template<typename ChildExpression, typename T>
 class GrammaticalElement1Arg : public GrammaticalElement_base<T> {
 public:
 	/**
-	 * Creates an instance of the templated expression type; either the 1-agument or 2-arguments version should be called, depending on what the expression type expects
+	 * Creates an instance of the templated expression type; either the 0-, 1- or 2-arguments version should be called, depending on what the expression type expects
 	 */
+	const ExpressionPtr<T> instantiate0Args() override {
+		return nullptr;
+	}
 	const ExpressionPtr<T> instantiate1Arg(const std::shared_ptr<Expression<T>> a) override {
 		return std::shared_ptr<ChildExpression>(new ChildExpression(a));
 	}
@@ -37,8 +59,11 @@ template<typename ChildExpression, typename T>
 class GrammaticalElement2Args : public GrammaticalElement_base<T> {
 public:
 	/**
-	 * Creates an instance of the templated expression type; either the 1-agument or 2-arguments version should be called, depending on what the expression type expects
+	 * Creates an instance of the templated expression type; either the 0-, 1- or 2-arguments version should be called, depending on what the expression type expects
 	 */
+	const ExpressionPtr<T> instantiate0Args() override {
+		return nullptr;
+	}
 	const ExpressionPtr<T> instantiate1Arg(const std::shared_ptr<Expression<T>> a) override {
 		return nullptr;
 	}
@@ -64,6 +89,7 @@ private:
 	/**
 	 * The library of base operations and functions to allow in expressions, respectively
 	 */
+	const std::vector<GrammaticalElement_base<T>*> variables;
 	const std::vector<GrammaticalElement_base<T>*> operations;
 	const std::vector<GrammaticalElement_base<T>*> functions;
 
@@ -74,9 +100,10 @@ public:
 	 */
 	GrammarDecoder(
 		const int& maxWraparounds,
+		const std::vector<GrammaticalElement_base<T>*>& variables,
 		const std::vector<GrammaticalElement_base<T>*>& operations,
 		const std::vector<GrammaticalElement_base<T>*>& functions
-	) : maxWraparounds(maxWraparounds), operations(operations), functions(functions) {}
+	) : maxWraparounds(maxWraparounds), variables(variables), operations(operations), functions(functions) {}
 
 	/**
 	 * Decodes a sequence of integers into a valid mathematical expression
@@ -99,6 +126,11 @@ private:
 	 * Decodes a function recursively; returns false if the sequence is found invalid
 	 */
 	bool decodeFunction(const std::vector<unsigned int>& sequence, unsigned int& ptr, unsigned int& wraps, std::shared_ptr<Expression<T>>& outFunction) const;
+
+	/**
+	 * Decodes a dimensional variable (x, y, z, etc)
+	 */
+	bool decodeVariable(const std::vector<unsigned int>& sequence, unsigned int& ptr, unsigned int& wraps, std::shared_ptr<Expression<T>>& outVariable) const;
 
 	/**
 	 * Decodes a constant recursively; returns false if the sequence is found invalid
@@ -150,8 +182,8 @@ inline bool GrammarDecoder<T>::decodeExpression(const std::vector<unsigned int>&
 		if(!decodeConstant(sequence, ptr, wraps, outExpression)) return false;
 		break;
 	case 3:
-		// x
-		outExpression = ExpressionPtr<T>(new VarX<T>());
+		// x, y, z, ... (depending on dimensionality of problem)
+		if (!decodeVariable(sequence, ptr, wraps, outExpression)) return false;
 		break;
 	}
 
@@ -180,6 +212,7 @@ inline bool GrammarDecoder<T>::decodeOperation(const std::vector<unsigned int>& 
 
 	// decode the head into one of the available operations
 	outOperation = operations[head % functions.size()]->instantiate2Args(a, b);
+	assert(outOperation);
 
 	return true;
 }
@@ -204,6 +237,28 @@ inline bool GrammarDecoder<T>::decodeFunction(const std::vector<unsigned int>& s
 
 	// decode the head into one of the available functions
 	outFunction = functions[head % functions.size()]->instantiate1Arg(inner);
+	assert(outFunction);
+
+	return true;
+}
+
+template<typename T>
+inline bool GrammarDecoder<T>::decodeVariable(const std::vector<unsigned int>& sequence, unsigned int& ptr, unsigned int& wraps, std::shared_ptr<Expression<T>>& outVariable) const {
+
+	// walk through sequence
+	int head = sequence[ptr];
+	++ptr;
+	if (ptr >= sequence.size()) {
+		ptr = 0;
+		++wraps;
+		if (wraps >= maxWraparounds) {
+			return false;
+		}
+	}
+
+	// decode the head into one of the available functions
+	outVariable = variables[head % variables.size()]->instantiate0Args();
+	assert(outVariable);
 
 	return true;
 }

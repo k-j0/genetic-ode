@@ -12,9 +12,9 @@ public:
 
 	Subtraction(ExpressionPtr<T> a, ExpressionPtr<T> b) : a(a), b(b) {}
 
-	T evaluate(T x) const override;
+	T evaluate(T x, T y) const override;
 
-	ExpressionPtr<T> derivative() const override;
+	ExpressionPtr<T> derivative(int dimension) const override;
 
 	ExpressionPtr<T> simplify() const override;
 
@@ -29,14 +29,14 @@ public:
 
 
 template<typename T>
-inline T Subtraction<T>::evaluate(T x) const {
-	return a->evaluate(x) - b->evaluate(x);
+inline T Subtraction<T>::evaluate(T x, T y) const {
+	return a->evaluate(x, y) - b->evaluate(x, y);
 }
 
 template<typename T>
-inline ExpressionPtr<T> Subtraction<T>::derivative() const {
-	auto aPrime = a->derivative();
-	auto bPrime = b->derivative();
+inline ExpressionPtr<T> Subtraction<T>::derivative(int dimension) const {
+	auto aPrime = a->derivative(dimension);
+	auto bPrime = b->derivative(dimension);
 	return SubtractionPtr(T, aPrime, bPrime);
 }
 
@@ -47,12 +47,12 @@ inline ExpressionPtr<T> Subtraction<T>::simplify() const {
 	bool constA = a_s->isConstant();
 	bool constB = b_s->isConstant();
 	if (constA && constB) {
-		return ConstantPtr(T, a_s->evaluate(0) - b_s->evaluate(0));
+		return ConstantPtr(T, a_s->evaluate(0, 0) - b_s->evaluate(0, 0));
 	}
-	if (constA && a_s->evaluate(0) == 0) {
+	if (constA && a_s->evaluate(0, 0) == 0) {
 		return MultiplicationPtr(T, ConstantPtr(T, -1), b_s); // if 0 - b, simplify to -1 * b
 	}
-	if (constB && b_s->evaluate(0) == 0) {
+	if (constB && b_s->evaluate(0, 0) == 0) {
 		return a_s;
 	}
 	return SubtractionPtr(T, a_s, b_s);

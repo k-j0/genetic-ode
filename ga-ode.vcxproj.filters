@@ -26,9 +26,6 @@
     <ClInclude Include="Expression.h">
       <Filter>Header Files\expressions</Filter>
     </ClInclude>
-    <ClInclude Include="VarX.h">
-      <Filter>Header Files\expressions</Filter>
-    </ClInclude>
     <ClInclude Include="Addition.h">
       <Filter>Header Files\expressions</Filter>
     </ClInclude>
@@ -63,6 +60,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Power.h">
+      <Filter>Header Files\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="Vars.h">
       <Filter>Header Files\expressions</Filter>
     </ClInclude>
   </ItemGroup>

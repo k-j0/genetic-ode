@@ -11,9 +11,9 @@ public:
 
 	Exponential(ExpressionPtr<T> a) : a(a) {}
 
-	T evaluate(T x) const override;
+	T evaluate(T x, T y) const override;
 
-	ExpressionPtr<T> derivative() const override;
+	ExpressionPtr<T> derivative(int dimension) const override;
 
 	ExpressionPtr<T> simplify() const override;
 
@@ -29,19 +29,19 @@ public:
 
 
 template<typename T>
-inline T Exponential<T>::evaluate(T x) const {
-	return exp(a->evaluate(x));
+inline T Exponential<T>::evaluate(T x, T y) const {
+	return exp(a->evaluate(x, y));
 }
 
 template<typename T>
-inline ExpressionPtr<T> Exponential<T>::derivative() const {
-	return MultiplicationPtr(T, a->derivative(), ExponentialPtr(T, a));
+inline ExpressionPtr<T> Exponential<T>::derivative(int dimension) const {
+	return MultiplicationPtr(T, a->derivative(dimension), ExponentialPtr(T, a));
 }
 
 template<typename T>
 inline ExpressionPtr<T> Exponential<T>::simplify() const {
 	if (a->isConstant()) {
-		return ConstantPtr(T, exp(a->evaluate(0)));
+		return ConstantPtr(T, exp(a->evaluate(0, 0)));
 	}
 	return ExponentialPtr(T, a->simplify());
 }

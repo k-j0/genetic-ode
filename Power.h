@@ -15,9 +15,9 @@ public:
 
 	Power(ExpressionPtr<T> a, ExpressionPtr<T> b) : a(a), b(b) {}
 
-	T evaluate(T x) const override;
+	T evaluate(T x, T y) const override;
 
-	ExpressionPtr<T> derivative() const override;
+	ExpressionPtr<T> derivative(int dimension) const override;
 
 	ExpressionPtr<T> simplify() const override;
 
@@ -32,14 +32,14 @@ public:
 
 
 template<typename T>
-inline T Power<T>::evaluate(T x) const {
-	return pow(a->evaluate(x), b->evaluate(x));
+inline T Power<T>::evaluate(T x, T y) const {
+	return pow(a->evaluate(x, y), b->evaluate(x, y));
 }
 
 template<typename T>
-inline ExpressionPtr<T> Power<T>::derivative() const {
-	auto aPrime = a->derivative();
-	auto bPrime = b->derivative();
+inline ExpressionPtr<T> Power<T>::derivative(int dimension) const {
+	auto aPrime = a->derivative(dimension);
+	auto bPrime = b->derivative(dimension);
 	// d/dx f(x)^g(x) = f(x)^g(x) * ( g'(x) ln(f(x)) + g(x)f'(x) / f(x) )
 	return MultiplicationPtr(T,
 		PowerPtr(T, a, b),
@@ -63,15 +63,15 @@ inline ExpressionPtr<T> Power<T>::simplify() const {
 	bool constA = a_s->isConstant();
 	bool constB = b_s->isConstant();
 	if (constA && constB) {
-		return ConstantPtr(T, pow(a_s->evaluate(0), b_s->evaluate(0)));
+		return ConstantPtr(T, pow(a_s->evaluate(0, 0), b_s->evaluate(0, 0)));
 	}
-	if (constB && b_s->evaluate(0) == 0) { // a^0 = 1 always
+	if (constB && b_s->evaluate(0, 0) == 0) { // a^0 = 1 always
 		return ConstantPtr(T, 1);
 	}
-	if (constA && a_s->evaluate(0) == 0) { // 0^b = 0 always (except when b = 0)
+	if (constA && a_s->evaluate(0, 0) == 0) { // 0^b = 0 always (except when b = 0)
 		return ConstantPtr(T, 0);
 	}
-	if (constB && b_s->evaluate(0) == 1) { // a^1 = 1
+	if (constB && b_s->evaluate(0, 0) == 1) { // a^1 = 1
 		return a_s;
 	}
 	return PowerPtr(T, a_s, b_s);

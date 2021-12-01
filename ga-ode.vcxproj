@@ -155,7 +155,7 @@
     <ClInclude Include="Power.h" />
     <ClInclude Include="Subtraction.h" />
     <ClInclude Include="Trig.h" />
-    <ClInclude Include="VarX.h" />
+    <ClInclude Include="Vars.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

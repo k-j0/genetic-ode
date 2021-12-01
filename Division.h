@@ -13,9 +13,9 @@ public:
 
 	Division(ExpressionPtr<T> a, ExpressionPtr<T> b) : a(a), b(b) {}
 
-	T evaluate(T x) const override;
+	T evaluate(T x, T y) const override;
 
-	ExpressionPtr<T> derivative() const override;
+	ExpressionPtr<T> derivative(int dimension) const override;
 
 	ExpressionPtr<T> simplify() const override;
 
@@ -30,20 +30,20 @@ public:
 
 
 template<typename T>
-inline T Division<T>::evaluate(T x) const {
-	T denominator = b->evaluate(x);
+inline T Division<T>::evaluate(T x, T y) const {
+	T denominator = b->evaluate(x, y);
 	if (denominator == 0) {
 		throw NAN;
 	}
-	return a->evaluate(x) / denominator;
+	return a->evaluate(x, y) / denominator;
 }
 
 template<typename T>
-inline ExpressionPtr<T> Division<T>::derivative() const {
+inline ExpressionPtr<T> Division<T>::derivative(int dimension) const {
 	// f(x) = a(x) / b(x)
 	// f' = (a'b - ab') / b^2
-	auto aPrime = a->derivative();
-	auto bPrime = b->derivative();
+	auto aPrime = a->derivative(dimension);
+	auto bPrime = b->derivative(dimension);
 	auto aPrimeB = MultiplicationPtr(T, aPrime, b);
 	auto bPrimeA = MultiplicationPtr(T, bPrime, a);
 	return DivisionPtr(T, SubtractionPtr(T, aPrimeB, bPrimeA), MultiplicationPtr(T, b, b));
@@ -56,12 +56,12 @@ inline ExpressionPtr<T> Division<T>::simplify() const {
 	bool constA = a_s->isConstant();
 	bool constB = b_s->isConstant();
 	if (constA && constB) {
-		return ConstantPtr(T, a_s->evaluate(0) / b_s->evaluate(0));
+		return ConstantPtr(T, a_s->evaluate(0, 0) / b_s->evaluate(0, 0));
 	}
-	if (constA && a_s->evaluate(0) == 0) {
+	if (constA && a_s->evaluate(0, 0) == 0) {
 		return ConstantPtr(T, 0);
 	}
-	if (constB && b_s->evaluate(0) == 1) {
+	if (constB && b_s->evaluate(0, 0) == 1) {
 		return a_s;
 	}
 	return DivisionPtr(T, a_s, b_s);

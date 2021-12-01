@@ -11,12 +11,12 @@ public:
 	/**
 	 * Evaluates the expression at point x
 	 */
-	virtual T evaluate(T x) const = 0;
+	virtual T evaluate(T x, T y) const = 0;
 
 	/**
-	 * Returns the expression that corresponds to the first derivative of this expression
+	 * Returns the expression that corresponds to the first derivative of this expression with respect to some dimensional variable (x if dimension == 0, y if dimension == 1, etc)
 	 */
-	virtual const std::shared_ptr<Expression<T>> derivative() const = 0;
+	virtual const std::shared_ptr<Expression<T>> derivative(int dimension) const = 0;
 
 	/**
 	 * Simplifies the given expression to make it easier to write out
@@ -53,9 +53,9 @@ public:
 	Constant(T v) : v(v) {}
 	Constant(int v) : v(T(v)) {}
 
-	T evaluate(T x) const override;
+	T evaluate(T x, T y) const override;
 
-	ExpressionPtr<T> derivative() const override;
+	ExpressionPtr<T> derivative(int dimension) const override;
 
 	ExpressionPtr<T> simplify() const override;
 
@@ -71,12 +71,12 @@ public:
 
 
 template<typename T>
-inline T Constant<T>::evaluate(T x) const {
+inline T Constant<T>::evaluate(T x, T y) const {
 	return v;
 }
 
 template<typename T>
-inline ExpressionPtr<T> Constant<T>::derivative() const {
+inline ExpressionPtr<T> Constant<T>::derivative(int dimension) const {
 	return ExpressionPtr<T>(new Constant<T>(0));
 }
 

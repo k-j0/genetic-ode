@@ -12,9 +12,9 @@ public:
 
 	Logarithm(ExpressionPtr<T> a) : a(a) {}
 
-	T evaluate(T x) const override;
+	T evaluate(T x, T y) const override;
 
-	ExpressionPtr<T> derivative() const override;
+	ExpressionPtr<T> derivative(int dimension) const override;
 
 	ExpressionPtr<T> simplify() const override;
 
@@ -30,8 +30,8 @@ public:
 
 
 template<typename T>
-inline T Logarithm<T>::evaluate(T x) const {
-	T inner = a->evaluate(x);
+inline T Logarithm<T>::evaluate(T x, T y) const {
+	T inner = a->evaluate(x, y);
 	if (inner <= 0) {
 		throw NAN;
 	}
@@ -39,14 +39,14 @@ inline T Logarithm<T>::evaluate(T x) const {
 }
 
 template<typename T>
-inline ExpressionPtr<T> Logarithm<T>::derivative() const {
-	return DivisionPtr(T, a->derivative(), a); // ln'(f) = f' / f
+inline ExpressionPtr<T> Logarithm<T>::derivative(int dimension) const {
+	return DivisionPtr(T, a->derivative(dimension), a); // ln'(f) = f' / f
 }
 
 template<typename T>
 inline ExpressionPtr<T> Logarithm<T>::simplify() const {
 	if (a->isConstant()) {
-		return ConstantPtr(T, log(a->evaluate(0)));
+		return ConstantPtr(T, log(a->evaluate(0, 0)));
 	}
 	return LogarithmPtr(T, a->simplify());
 }
