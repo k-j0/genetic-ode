@@ -27,19 +27,7 @@ struct Boundary {
 	std::function<const T(const T r, const T f, const T df, const T ddf)> function;
 
 
-	/// Constructors
-	/// 1D boundary condition (of the form f^d(x_0, y) = f_0, with f_0 some constant
-	inline Boundary(T x_0, T f_0, int derivative) : p(x_0), dimension(0) {
-		assert(derivative <= 2);
-		function = [&f_0, &derivative](const T y, const T f, const T df, const T ddf) -> const T {
-			switch (derivative) {
-			case 2: return ddf - f_0;
-			case 1: return df - f_0;
-			default: return f - f_0;
-			}
-		};
-	}
-	// higher dimensional boundary condition
+	/// Default constructor
 	inline Boundary(T p, int dimension, const std::function<const T(const T r, const T f, const T df, const T ddf)> function) : p(p), dimension(dimension), function(function) {}
 
 };

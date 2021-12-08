@@ -17,13 +17,24 @@
 GrammarDecoder<double>* decoder;
 
 
-#define POPULATION_SIZE 1000
-#define CHROMOSOME_SIZE 50
-#define REPLICATION_RATE 0.1
-#define MUTATION_RATE 0.05
-#define RANDOM_RATE 0.05
-#define GENERATIONS 4000
-#define VERBOSE true
+//#define FULLY_RANDOM // whether to completely randomise the population every single generation
+#define VERBOSE false
+
+#ifdef FULLY_RANDOM
+	#define POPULATION_SIZE 5000
+	#define CHROMOSOME_SIZE 50
+	#define REPLICATION_RATE 0.0002
+	#define MUTATION_RATE 0.0002
+	#define RANDOM_RATE 0.9996
+	#define GENERATIONS 1000
+#else
+	#define POPULATION_SIZE 500
+	#define CHROMOSOME_SIZE 50
+	#define REPLICATION_RATE 0.1
+	#define MUTATION_RATE 0.05
+	#define RANDOM_RATE 0.15
+	#define GENERATIONS 2000
+#endif
 
 
 void solve(std::string name, Fitness<double> fitnessFunction, int seed) {
@@ -68,7 +79,7 @@ int main() {
 	// Set up grammar
 	std::vector<GrammaticalElement_base<double>*> variables = {
 		Gd(VarX),
-		Gd(VarY) // <- included only for PDEs
+		//Gd(VarY) // <- included only for PDEs
 	};
 	std::vector<GrammaticalElement_base<double>*> operations = {
 		G2d(Addition),
@@ -87,59 +98,20 @@ int main() {
 
 
 	// solve example ODEs
-	/*std::vector<std::thread*> threads;
+	std::vector<std::thread*> threads;
 	for (int i = 1; i <= 9; ++i) {
 		threads.push_back(new std::thread(solve, "ODE" + std::to_string(i), getExampleODE(i), i));
 	}
 	for (auto it = threads.begin(); it != threads.end(); it++) {
 		(*it)->join();
 		delete *it;
-	}*/
-
-	auto pde3 = Fitness<double>(
-		[](FunctionParams<double> p) -> const double {
-			return p.ddx2 + p.ddy2 - 4;
-		},
-		Domain<double>(), Domain<double>(), 10,
-		{
-			Boundary<double>(0, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
-				return -f + y * y + y + 1; // psi(0, y) = y^2 + y + 1
-			}),
-			Boundary<double>(1, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
-				return -f + y * y + y + 3; // psi(1, y) = y^2 + y + 3
-			}),
-			Boundary<double>(0, 1, [](double x, double f, double dfdy, double ddfdy) -> double {
-				return -f + x * x + x + 1; // psi(x, 0) = x^2 + x + 1
-			}),
-			Boundary<double>(1, 1, [](double x, double f, double dfdy, double ddfdy) -> double {
-				return -f + x * x + x + 3; // psi(x, 1) = x^2 + x + 3
-			})
-		});
-	auto expr = AdditionPtrd(
-		AdditionPtrd(
-			MultiplicationPtrd(VarXPtrd, VarXPtrd),
-			MultiplicationPtrd(VarYPtrd, VarYPtrd)
-		),
-		AdditionPtrd(
-			AdditionPtrd(VarXPtrd, VarYPtrd),
-			ConstantPtrd(1)
-		)
-	); // Ψ(x, y) = x^2 + y^2 + x + y + 1
-	printf("Expression: f(x, y) = %s\n\n", expr->toString().c_str());
-	printf("d/dx f(x, y) = %s\n\n", expr->derivative(0)->simplify()->toString().c_str());
-	try {
-		double fitness = pde3.fitness(expr);
-		printf("Fitness of actual solution: %f\n", fitness);
-	} catch (...) {
-		printf("Cannot compute fitness for actual solution...\n");
 	}
-	return 0;
 
-	solve("PDE3", Fitness<double>(
+	/*solve("PDE3", Fitness<double>(
 		[](FunctionParams<double> p) -> const double {
 			return p.ddx2 + p.ddy2 - 4;
 		},
-		Domain<double>(), Domain<double>(), 10,
+		Domain<double>(), Domain<double>(), 1000,
 		{
 			Boundary<double>(0, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
 				return -f + y * y + y + 1; // psi(0, y) = y^2 + y + 1
@@ -154,7 +126,7 @@ int main() {
 				return -f + x * x + x + 3; // psi(x, 1) = x^2 + x + 3
 			})
 		}
-	), time(nullptr));
+	), time(nullptr));*/
 	
 
 

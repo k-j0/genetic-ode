@@ -11,12 +11,21 @@
 		return -deriv + (function); \
 	}
 
+#define BOUNDARY_F(x_0, f_0) \
+			Boundary<double>(x_0, 0, [](double y, double f, double df, double ddf) -> double { \
+				return -f + f_0; \
+			})
+#define BOUNDARY_DFDX(x_0, df_0) \
+			Boundary<double>(x_0, 0, [](double y, double f, double df, double ddf) -> double { \
+				return -df + df_0; \
+			})
+
 Fitness<double> ode1() {
 	return Fitness<double>(
 		ODE(dy, (2 * x - y) / x),
 		Domain<double>(0.1), Domain<double>(EMPTY), 100,
 		{
-			Boundary<double>(0.1, 20.1, 0)
+			BOUNDARY_F(0.1, 20.1)
 		});
 }
 
@@ -25,7 +34,7 @@ Fitness<double> ode2() {
 		ODE(dy, (1-y*cos(x))/sin(x)),
 		Domain<double>(0.1), Domain<double>(EMPTY), 100,
 		{
-			Boundary<double>(0.1, 2.1/sin(0.1), 0)
+			BOUNDARY_F(0.1, 2.1/sin(0.1))
 		});
 }
 
@@ -34,7 +43,7 @@ Fitness<double> ode3() {
 		ODE(dy, -y/5 + exp(-x/5) * cos(x)),
 		Domain<double>(), Domain<double>(EMPTY), 100,
 		{
-			Boundary<double>(0.0, 0.0, 0)
+			BOUNDARY_F(0.0, 0.0)
 		});
 }
 
@@ -43,8 +52,14 @@ Fitness<double> ode4() {
 		ODE(ddy, -100*y),
 		Domain<double>(), Domain<double>(EMPTY), 100,
 		{
-			Boundary<double>(0.0, 0.0, 0),
-			Boundary<double>(0.0, 10.0, 1)
+			/*Boundary<double>(0, 0, [](double y, double f, double df, double ddf) -> double {
+				return -f + 0;
+			}),
+			Boundary<double>(0, 0, [](double y, double f, double df, double ddf) -> double {
+				return -df + 10;
+			})*/
+			BOUNDARY_F(0.0, 0.0),
+			BOUNDARY_DFDX(0.0, 10.0)
 		});
 }
 
@@ -53,8 +68,8 @@ Fitness<double> ode5() {
 		ODE(ddy, 6 * dy - 9 * y),
 		Domain<double>(), Domain<double>(EMPTY), 100,
 		{
-			Boundary<double>(0.0, 0.0, 0),
-			Boundary<double>(0.0, 2.0, 1)
+			BOUNDARY_F(0.0, 0.0),
+			BOUNDARY_DFDX(0.0, 2.0)
 		});
 }
 
@@ -63,8 +78,8 @@ Fitness<double> ode6() {
 		ODE(ddy, -dy / 5 - y - exp(-x / 5) * cos(x) / 5),
 		Domain<double>(0, 2), Domain<double>(EMPTY), 100,
 		{
-			Boundary<double>(0.0, 0.0, 0),
-			Boundary<double>(0.0, 1.0, 1)
+			BOUNDARY_F(0.0, 0.0),
+			BOUNDARY_DFDX(0.0, 1.0)
 		});
 }
 
@@ -73,8 +88,8 @@ Fitness<double> ode7() {
 		ODE(ddy, -100 * y),
 		Domain<double>(), Domain<double>(EMPTY), 100,
 		{
-			Boundary<double>(0.0, 0.0, 0),
-			Boundary<double>(1.0, sin(10.0), 0)
+			BOUNDARY_F(0.0, 0.0),
+			BOUNDARY_F(1.0, sin(10.0))
 		});
 }
 
@@ -83,8 +98,8 @@ Fitness<double> ode8() {
 		ODE(0, x * ddy + (1 - x) * dy + y),
 		Domain<double>(0), Domain<double>(EMPTY), 100,
 		{
-			Boundary<double>(0.0, 1.0, 0),
-			Boundary<double>(1.0, 0.0, 0)
+			BOUNDARY_F(0.0, 1.0),
+			BOUNDARY_F(1.0, 0.0)
 		});
 }
 
@@ -93,8 +108,8 @@ Fitness<double> ode9() {
 		ODE(ddy, -dy / 5 - y - exp(-x / 5) * cos(x) / 5),
 		Domain<double>(0), Domain<double>(EMPTY), 100,
 		{
-			Boundary<double>(0.0, 0.0, 0),
-			Boundary<double>(1.0, sin(1.0) / exp(0.2), 0)
+			BOUNDARY_F(0.0, 0.0),
+			BOUNDARY_F(1.0, sin(1.0) / exp(0.2))
 		});
 }
 
@@ -113,3 +128,5 @@ Fitness<double> getExampleODE(int n) {
 }
 
 #undef ODE
+#undef BOUNDARY_F
+#undef BOUNDARY_DFDX
