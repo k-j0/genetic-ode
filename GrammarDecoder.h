@@ -277,8 +277,10 @@ inline bool GrammarDecoder<T>::decodeConstant(const std::vector<unsigned int>& s
 		}
 	}
 
-	// one of 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 as a constant, or negative variations
-	outConstant = ConstantPtr(T, head % 20 - 10);
+	// one of [-10,10] or pi as constant
+	T cnstnt = T(head % 22 - 10); // 0..21 -> -10..11
+	if (cnstnt == 11) cnstnt = M_PI; // -10..10 OR pi
+	outConstant = ConstantPtr(T, cnstnt);
 
 	return true;
 }

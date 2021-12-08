@@ -2,9 +2,9 @@
 
 
 //#define FULLY_RANDOM // whether to completely randomise the population every single generation
-#define EXAMPLE_ODES // whether to run example ODE problems
-#define EXAMPLE_NLODES // whether to run example NLODE problems
-#define EXAMPLE_PDES // whether to run example PDE problems
+//#define EXAMPLE_ODES // whether to run example ODE problems
+//#define EXAMPLE_NLODES // whether to run example NLODE problems
+//#define EXAMPLE_PDES // whether to run example PDE problems
 #define HEAT // whether to run the heat equation problem
 #define VERBOSE false
 
@@ -33,6 +33,9 @@
 #include <stdlib.h>
 #include <cmath>
 #include <thread>
+#ifndef M_PI
+#define M_PI 3.14159265359
+#endif
 #include "Vars.h"
 #include "Addition.h"
 #include "Multiplication.h"
@@ -52,9 +55,6 @@
 
 
 
-#ifndef PI
-#define PI 3.14159265359
-#endif
 Fitness<double> heatPde(double tMax) {
 	// exact solution:
 	// u(x, t) = e^{- pi^2 t} sin(pi x)
@@ -71,7 +71,7 @@ Fitness<double> heatPde(double tMax) {
 				return -f; // u(L, t) = 0
 			}),
 			Boundary<double>(0, 1, [](double x, double f, double dfdt, double ddfdt) -> double {
-				return f - sin(PI * x); // u(x, 0) = sin(pi x)
+				return f - sin(M_PI * x); // u(x, 0) = sin(pi x)
 			})
 		}
 	);
