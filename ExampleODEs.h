@@ -52,12 +52,6 @@ Fitness<double> ode4() {
 		ODE(ddy, -100*y),
 		Domain<double>(), Domain<double>(EMPTY), 100,
 		{
-			/*Boundary<double>(0, 0, [](double y, double f, double df, double ddf) -> double {
-				return -f + 0;
-			}),
-			Boundary<double>(0, 0, [](double y, double f, double df, double ddf) -> double {
-				return -df + 10;
-			})*/
 			BOUNDARY_F(0.0, 0.0),
 			BOUNDARY_DFDX(0.0, 10.0)
 		});

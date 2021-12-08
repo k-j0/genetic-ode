@@ -1,4 +1,32 @@
 ﻿
+
+
+//#define FULLY_RANDOM // whether to completely randomise the population every single generation
+//#define EXAMPLE_ODES // whether to run example ODE problems
+//#define EXAMPLE_PDES // whether to run example PDE problems
+#define VERBOSE true
+
+
+#ifdef FULLY_RANDOM
+	#define POPULATION_SIZE 5000
+	#define CHROMOSOME_SIZE 50
+	#define REPLICATION_RATE 0.0002
+	#define MUTATION_RATE 0.0002
+	#define RANDOM_RATE 0.9996
+	#define GENERATIONS 1000
+#else
+	#define POPULATION_SIZE 1000
+	#define CHROMOSOME_SIZE 50
+	#define REPLICATION_RATE 0.1
+	#define MUTATION_RATE 0.05
+	#define RANDOM_RATE 0.0
+	#define GENERATIONS 2000
+#endif
+
+
+// ------------------------------------
+
+
 #include <ctime>
 #include <thread>
 #include "Vars.h"
@@ -11,33 +39,42 @@
 #include "Logarithm.h"
 #include "GrammarDecoder.h"
 #include "Population.h"
-#include "ExampleODEs.h"
-
-
-GrammarDecoder<double>* decoder;
-
-
-//#define FULLY_RANDOM // whether to completely randomise the population every single generation
-#define VERBOSE false
-
-#ifdef FULLY_RANDOM
-	#define POPULATION_SIZE 5000
-	#define CHROMOSOME_SIZE 50
-	#define REPLICATION_RATE 0.0002
-	#define MUTATION_RATE 0.0002
-	#define RANDOM_RATE 0.9996
-	#define GENERATIONS 1000
-#else
-	#define POPULATION_SIZE 500
-	#define CHROMOSOME_SIZE 50
-	#define REPLICATION_RATE 0.1
-	#define MUTATION_RATE 0.05
-	#define RANDOM_RATE 0.15
-	#define GENERATIONS 2000
+#ifdef EXAMPLE_ODES
+	#include "ExampleODEs.h"
+#endif
+#ifdef EXAMPLE_PDES
+	#include "ExamplePDEs.h"
 #endif
 
 
-void solve(std::string name, Fitness<double> fitnessFunction, int seed) {
+
+#ifndef PI
+#define PI 3.14159265359
+#endif
+Fitness<double> heatPde(double tMax) {
+	return Fitness<double>(
+		[](FunctionParams<double> p) -> const double {
+			return p.ddx2 - p.ddy; // d^2/dx^2 u = d/dt u
+		},
+		Domain<double>(0, 1, 50), Domain<double>(0, tMax, 50), 1,
+		{
+			Boundary<double>(0, 0, [](double t, double f, double dfdx, double ddfdx) -> double {
+				return -f; // u(0, t) = 0
+			}),
+			Boundary<double>(1, 0, [](double t, double f, double dfdx, double ddfdx) -> double {
+				return -f; // u(L, t) = 0
+			}),
+			Boundary<double>(0, 1, [](double x, double f, double dfdt, double ddfdt) -> double {
+				return f - sin(PI * x); // u(x, 0) = sin(pi x)
+			})
+		}
+	);
+}
+
+
+
+
+void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<double>* decoder, int seed) {
 
 	// Init population
 	Population<double> population(POPULATION_SIZE, CHROMOSOME_SIZE, REPLICATION_RATE, MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);
@@ -76,10 +113,13 @@ void solve(std::string name, Fitness<double> fitnessFunction, int seed) {
 
 int main() {
 
-	// Set up grammar
-	std::vector<GrammaticalElement_base<double>*> variables = {
+	// Set up grammar - two different variants for 1D problems (ODEs) and 2D problems (PDEs)
+	std::vector<GrammaticalElement_base<double>*> variables1d = {
+		Gd(VarX)
+	};
+	std::vector<GrammaticalElement_base<double>*> variables2d = {
 		Gd(VarX),
-		//Gd(VarY) // <- included only for PDEs
+		Gd(VarY)
 	};
 	std::vector<GrammaticalElement_base<double>*> operations = {
 		G2d(Addition),
@@ -93,44 +133,38 @@ int main() {
 		G1d(Exponential),
 		G1d(Logarithm)
 	};
-	decoder = new GrammarDecoder<double>(0, variables, operations, functions);
+	auto decoder1d = new GrammarDecoder<double>(0, variables1d, operations, functions);
+	auto decoder2d = new GrammarDecoder<double>(0, variables2d, operations, functions);
 
 
-
-	// solve example ODEs
 	std::vector<std::thread*> threads;
+
+
+
+	// solve example ODEs from the original paper
+#ifdef EXAMPLE_ODES
 	for (int i = 1; i <= 9; ++i) {
-		threads.push_back(new std::thread(solve, "ODE" + std::to_string(i), getExampleODE(i), i));
+		threads.push_back(new std::thread(solve, "ODE" + std::to_string(i), getExampleODE(i), decoder1d, i));
 	}
+#endif
+
+
+	// solve example PDEs from the original paper
+#ifdef EXAMPLE_PDES
+	for (int i = 1; i <= 6; ++i) {
+		threads.push_back(new std::thread(solve, "PDE" + std::to_string(i), getExamplePDE(i), decoder2d, i));
+	}
+#endif
+
+	threads.push_back(new std::thread(solve, "Heat", heatPde(1), decoder2d, 1));
+
+
 	for (auto it = threads.begin(); it != threads.end(); it++) {
 		(*it)->join();
-		delete *it;
+		delete* it;
 	}
 
-	/*solve("PDE3", Fitness<double>(
-		[](FunctionParams<double> p) -> const double {
-			return p.ddx2 + p.ddy2 - 4;
-		},
-		Domain<double>(), Domain<double>(), 1000,
-		{
-			Boundary<double>(0, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
-				return -f + y * y + y + 1; // psi(0, y) = y^2 + y + 1
-			}),
-			Boundary<double>(1, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
-				return -f + y * y + y + 3; // psi(1, y) = y^2 + y + 3
-			}),
-			Boundary<double>(0, 1, [](double x, double f, double dfdy, double ddfdy) -> double {
-				return -f + x * x + x + 1; // psi(x, 0) = x^2 + x + 1
-			}),
-			Boundary<double>(1, 1, [](double x, double f, double dfdy, double ddfdy) -> double {
-				return -f + x * x + x + 3; // psi(x, 1) = x^2 + x + 3
-			})
-		}
-	), time(nullptr));*/
-	
-
-
-	delete decoder;
-
+	delete decoder1d;
+	delete decoder2d;
 	return 0;
 }

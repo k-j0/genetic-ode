@@ -62,5 +62,8 @@
     <ClInclude Include="Vars.h">
       <Filter>Header Files\expressions</Filter>
     </ClInclude>
+    <ClInclude Include="ExamplePDEs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

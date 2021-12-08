@@ -145,6 +145,7 @@
     <ClInclude Include="Addition.h" />
     <ClInclude Include="Division.h" />
     <ClInclude Include="ExampleODEs.h" />
+    <ClInclude Include="ExamplePDEs.h" />
     <ClInclude Include="Exponential.h" />
     <ClInclude Include="Expression.h" />
     <ClInclude Include="Fitness.h" />
