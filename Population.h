@@ -8,7 +8,7 @@
 #include "Fitness.h"
 #include "Expression.h"
 
-#define RAND int(abs(rng()))
+#define RAND abs(int(rng()))
 
 
 /**
