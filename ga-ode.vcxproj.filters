@@ -65,7 +65,7 @@
     <ClInclude Include="ExamplePDEs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SquareRoot.h">
+    <ClInclude Include="Power.h">
       <Filter>Header Files\expressions</Filter>
     </ClInclude>
   </ItemGroup>

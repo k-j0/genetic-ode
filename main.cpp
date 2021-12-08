@@ -3,9 +3,9 @@
 
 //#define FULLY_RANDOM // whether to completely randomise the population every single generation
 //#define EXAMPLE_ODES // whether to run example ODE problems
-#define EXAMPLE_NLODES // whether to run example NLODE problems
+//#define EXAMPLE_NLODES // whether to run example NLODE problems
 //#define EXAMPLE_PDES // whether to run example PDE problems
-//#define HEAT // whether to run the heat equation problem
+#define HEAT // whether to run the heat equation problem
 #define VERBOSE true
 
 
@@ -45,6 +45,7 @@
 #include "Exponential.h"
 #include "Logarithm.h"
 #include "SquareRoot.h"
+#include "Power.h"
 #include "GrammarDecoder.h"
 #include "Population.h"
 #if defined(EXAMPLE_ODES) or defined(EXAMPLE_NLODES)
@@ -132,14 +133,15 @@ int main() {
 		G2d(Addition),
 		G2d(Subtraction),
 		G2d(Multiplication),
-		G2d(Division)
+		G2d(Division),
+		G2d(Power)
 	};
 	std::vector<GrammaticalElement_base<double>*> functions = {
 		G1d(Sine),
 		G1d(Cosine),
 		G1d(Exponential),
 		G1d(Logarithm),
-		G1d(SquareRoot)
+		// G1d(SquareRoot) <- not including sqrt() in the grammar since it's not quite general enough, we already have powers so it's possible to obtain ^0.5 anyways
 	};
 	auto decoder1d = new GrammarDecoder<double>(0, variables1d, operations, functions);
 	auto decoder2d = new GrammarDecoder<double>(0, variables2d, operations, functions);
