@@ -6,7 +6,7 @@
 //#define EXAMPLE_NLODES // whether to run example NLODE problems
 //#define EXAMPLE_PDES // whether to run example PDE problems
 #define HEAT // whether to run the heat equation problem
-#define VERBOSE false
+#define VERBOSE true
 
 
 #ifdef FULLY_RANDOM
