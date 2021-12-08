@@ -125,8 +125,7 @@ inline const Chromosome<T>* Population<T>::nextGeneration() {
 	for (auto& ch : chromosomes) {
 		ch.parent = false;
 		ch.expression = decoder->decode(ch.genes);
-		// @todo: might want to also discriminate against constant expressions by setting the fitness to infinity when ch.expression->isConstant()
-		if (ch.expression == nullptr) {
+		if (ch.expression == nullptr || ch.expression->isConstant()) {
 			ch.fitness = INFINITY; // invalid expression, definitely don't want to keep this one
 		} else {
 			try {
