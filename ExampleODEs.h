@@ -3,7 +3,7 @@
 #include "Fitness.h"
 
 
-/// Example ODEs from the original paper
+/// Example ODEs and NLODEs from the original paper
 
 #define ODE(deriv, function) \
 	[](FunctionParams<double> p) -> const double { \
@@ -26,7 +26,8 @@ Fitness<double> ode1() {
 		Domain<double>(0.1), Domain<double>(EMPTY), 100,
 		{
 			BOUNDARY_F(0.1, 20.1)
-		});
+		}
+	);
 }
 
 Fitness<double> ode2() {
@@ -35,7 +36,8 @@ Fitness<double> ode2() {
 		Domain<double>(0.1), Domain<double>(EMPTY), 100,
 		{
 			BOUNDARY_F(0.1, 2.1/sin(0.1))
-		});
+		}
+	);
 }
 
 Fitness<double> ode3() {
@@ -44,7 +46,8 @@ Fitness<double> ode3() {
 		Domain<double>(), Domain<double>(EMPTY), 100,
 		{
 			BOUNDARY_F(0.0, 0.0)
-		});
+		}
+	);
 }
 
 Fitness<double> ode4() {
@@ -54,7 +57,8 @@ Fitness<double> ode4() {
 		{
 			BOUNDARY_F(0.0, 0.0),
 			BOUNDARY_DFDX(0.0, 10.0)
-		});
+		}
+	);
 }
 
 Fitness<double> ode5() {
@@ -64,7 +68,8 @@ Fitness<double> ode5() {
 		{
 			BOUNDARY_F(0.0, 0.0),
 			BOUNDARY_DFDX(0.0, 2.0)
-		});
+		}
+	);
 }
 
 Fitness<double> ode6() {
@@ -74,7 +79,8 @@ Fitness<double> ode6() {
 		{
 			BOUNDARY_F(0.0, 0.0),
 			BOUNDARY_DFDX(0.0, 1.0)
-		});
+		}
+	);
 }
 
 Fitness<double> ode7() {
@@ -84,7 +90,8 @@ Fitness<double> ode7() {
 		{
 			BOUNDARY_F(0.0, 0.0),
 			BOUNDARY_F(1.0, sin(10.0))
-		});
+		}
+	);
 }
 
 Fitness<double> ode8() {
@@ -94,7 +101,8 @@ Fitness<double> ode8() {
 		{
 			BOUNDARY_F(0.0, 1.0),
 			BOUNDARY_F(1.0, 0.0)
-		});
+		}
+	);
 }
 
 Fitness<double> ode9() {
@@ -104,7 +112,49 @@ Fitness<double> ode9() {
 		{
 			BOUNDARY_F(0.0, 0.0),
 			BOUNDARY_F(1.0, sin(1.0) / exp(0.2))
-		});
+		}
+	);
+}
+
+Fitness<double> nlode1() {
+	return Fitness<double>(
+		ODE(dy, 1 / (2 * y)),
+		Domain<double>(1, 4), Domain<double>(EMPTY), 100,
+		{
+			BOUNDARY_F(1.0, 1.0)
+		}
+	);
+}
+
+Fitness<double> nlode2() {
+	return Fitness<double>(
+		ODE(0, dy*dy + log(y) - cos(x)*cos(x) - 2*cos(x) - 1 - log(x+sin(x))),
+		Domain<double>(1, 2), Domain<double>(EMPTY), 100,
+		{
+			BOUNDARY_F(1.0, 1.0 + sin(1.0))
+		}
+	);
+}
+
+Fitness<double> nlode3() {
+	return Fitness<double>(
+		ODE(ddy * dy, -4/(x*x*x)),
+		Domain<double>(1, 2), Domain<double>(EMPTY), 100,
+		{
+			BOUNDARY_F(1.0, 0.0)
+		}
+	);
+}
+
+Fitness<double> nlode4() {
+	return Fitness<double>(
+		ODE(0, x*x*ddy + (x*dy)*(x*dy) + 1/log(x)),
+		Domain<double>(exp(1), 2*exp(1)), Domain<double>(EMPTY), 100,
+		{
+			BOUNDARY_F(exp(1.0), 0.0),
+			BOUNDARY_DFDX(exp(1.0), exp(-1.0))
+		}
+	);
 }
 
 Fitness<double> getExampleODE(int n) {
@@ -118,6 +168,15 @@ Fitness<double> getExampleODE(int n) {
 	case 8: return ode8();
 	case 9: return ode9();
 	default: return ode1();
+	}
+}
+
+Fitness<double> getExampleNLODE(int n) {
+	switch (n) {
+	case 2: return nlode2();
+	case 3: return nlode3();
+	case 4: return nlode4();
+	default: return nlode1();
 	}
 }
 

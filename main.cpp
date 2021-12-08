@@ -3,8 +3,10 @@
 
 //#define FULLY_RANDOM // whether to completely randomise the population every single generation
 #define EXAMPLE_ODES // whether to run example ODE problems
+#define EXAMPLE_NLODES // whether to run example NLODE problems
 #define EXAMPLE_PDES // whether to run example PDE problems
-#define VERBOSE true
+#define HEAT // whether to run the heat equation problem
+#define VERBOSE false
 
 
 #ifdef FULLY_RANDOM
@@ -41,7 +43,7 @@
 #include "Logarithm.h"
 #include "GrammarDecoder.h"
 #include "Population.h"
-#ifdef EXAMPLE_ODES
+#if defined(EXAMPLE_ODES) or defined(EXAMPLE_NLODES)
 	#include "ExampleODEs.h"
 #endif
 #ifdef EXAMPLE_PDES
@@ -152,6 +154,12 @@ int main() {
 	}
 #endif
 
+	// solve example NLODEs from the original paper
+#ifdef EXAMPLE_NLODES
+	for (int i = 1; i <= 4; ++i) {
+		threads.push_back(new std::thread(solve, "NLODE" + std::to_string(i), getExampleNLODE(i), decoder1d, i));
+	}
+#endif
 
 	// solve example PDEs from the original paper
 #ifdef EXAMPLE_PDES
@@ -160,7 +168,9 @@ int main() {
 	}
 #endif
 
+#ifdef HEAT
 	threads.push_back(new std::thread(solve, "Heat", heatPde(1), decoder2d, 1));
+#endif
 
 
 	for (auto it = threads.begin(); it != threads.end(); it++) {
