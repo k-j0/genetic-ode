@@ -59,9 +59,6 @@
     <ClInclude Include="ExampleODEs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Power.h">
-      <Filter>Header Files\expressions</Filter>
-    </ClInclude>
     <ClInclude Include="Vars.h">
       <Filter>Header Files\expressions</Filter>
     </ClInclude>

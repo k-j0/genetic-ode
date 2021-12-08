@@ -11,54 +11,37 @@ template<typename T>
 struct Boundary {
 
 	/**
-	 * The point in x at which to evaluate the boundary condition
+	 * The point at which to evaluate the boundary condition, either on x or y (x_0 = p if dimension == 0, y_0 = p if dimension==1)
 	 */
-	T x = 0;
-
-	/**
-	 * The point in y at which to evaluate the boundary condition
-	 */
-	T y = 0;
-
-	/**
-	 * The expected value for the boundary condition
-	 */
-	T result = 0;
-
-	/**
-	 * The derivative to evaluate; 0 for f(x, y), 1 for f'(x, y), 2 for f''(x, y)
-	 */
-	int derivative = 0;
+	T p = 0;
 
 	/**
 	 * The variable with respect to which to take the derivative (0 -> x, 1 -> y, etc.)
 	 */
 	int dimension = 0;
 
-	/// Constructors
-	inline Boundary(T x, T f, int derivative) : x(x), result(f), derivative(derivative) {}
-	inline Boundary(T x, T y, T f, int derivative, int dimension) : x(x), y(y), result(f), derivative(derivative), dimension(dimension) {}
-
 	/**
-	 * Evaluate the boundary condition as f^(d) (x_0, y_0) - f_0
+	 * Function of the dimensional parameter (r = y for dimension = 0, r = x for dimension = 1)
+	 * If dimension = 0, i.e. p = x_0, r = y, f = f(x_0, y), df = d/dx (x_0, y), ddf = d^2/dx^2 f(x_0, y)
 	 */
-	inline const T evaluate(const ExpressionPtr<T>& f, const ExpressionPtr<T>& dFdx, const ExpressionPtr<T>& dFdy, const ExpressionPtr<T>& ddFdx2, const ExpressionPtr<T>& ddFdy2) const {
-		T d;
-		if (dimension == 0) {
+	std::function<const T(const T r, const T f, const T df, const T ddf)> function;
+
+
+	/// Constructors
+	/// 1D boundary condition (of the form f^d(x_0, y) = f_0, with f_0 some constant
+	inline Boundary(T x_0, T f_0, int derivative) : p(x_0), dimension(0) {
+		assert(derivative <= 2);
+		function = [&f_0, &derivative](const T y, const T f, const T df, const T ddf) -> const T {
 			switch (derivative) {
-			case 2: d = dFdx->evaluate(x, y); break;
-			case 1: d = ddFdx2->evaluate(x, y); break;
-			default: d = f->evaluate(x, y); break;
+			case 2: return ddf - f_0;
+			case 1: return df - f_0;
+			default: return f - f_0;
 			}
-		} else if (dimension == 1) {
-			switch (derivative) {
-			case 2: d = dFdy->evaluate(x, y); break;
-			case 1: d = ddFdy2->evaluate(x, y); break;
-			default: d = f->evaluate(x, y); break;
-			}
-		} else { assert(false); }
-		return d - result;
+		};
 	}
+	// higher dimensional boundary condition
+	inline Boundary(T p, int dimension, const std::function<const T(const T r, const T f, const T df, const T ddf)> function) : p(p), dimension(dimension), function(function) {}
+
 };
 
 
@@ -177,16 +160,26 @@ inline const T Fitness<T>::fitness(const ExpressionPtr<T>& f) const {
 	// Compute the boundary conditions into the penalty
 	T p = 0;
 	for (auto& b : boundaries) {
-		if (b.x < domainX.rangeStart || b.x > domainX.rangeEnd) {
-			printf("Warning: boundary condition is outside domain; x = %f, domain is [%f, %f]!\n", b.x, domainX.rangeStart, domainX.rangeEnd);
-			exit(-1);
+		switch (b.dimension) {
+		case 0: // boundary on x, i.e. b.p = x_0, and the boundary should be called for r = y, f = f(x_0, y), df = d/dx (x_0, y), ddf = d^2/dx^2 f(x_0, y)
+			assert(b.p >= domainX.rangeStart && b.p <= domainX.rangeEnd);
+			for (int iy = 0; iy < domainY.numPoints; ++iy) {
+				T y = domainY.point(iy);
+				T result = b.function(y, f->evaluate(b.p, y), dFdx->evaluate(b.p, y), ddFdx2->evaluate(b.p, y));
+				p += result * result;
+			}
+			break;
+		case 1: // boundary on y, i.e. b.p = y_0, and the boundary should be called for r = x, f = f(x, y_0), df = d/dy (x, y_0), ddf = d^2/dy^2 f(x, y_0)
+			assert(b.p >= domainY.rangeStart && b.p <= domainY.rangeEnd);
+			for (int ix = 0; ix < domainX.numPoints; ++ix) {
+				T x = domainX.point(ix);
+				T result = b.function(x, f->evaluate(x, b.p), dFdx->evaluate(x, b.p), ddFdx2->evaluate(x, b.p));
+				p += result * result;
+			}
+			break;
+		default: // invalid dimension
+			assert(false);
 		}
-		if (b.y < domainY.rangeStart || b.y > domainY.rangeEnd) {
-			printf("Warning: boundary condition is outside domain; y = %f, domain is [%f, %f]!\n", b.y, domainY.rangeStart, domainY.rangeEnd);
-			exit(-1);
-		}
-		T result = b.evaluate(f, dFdx, dFdy, ddFdx2, ddFdy2);
-		p += result * result;
 	}
 
 	return e + lambda * p;
