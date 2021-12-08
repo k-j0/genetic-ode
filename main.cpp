@@ -2,8 +2,8 @@
 
 
 //#define FULLY_RANDOM // whether to completely randomise the population every single generation
-//#define EXAMPLE_ODES // whether to run example ODE problems
-//#define EXAMPLE_PDES // whether to run example PDE problems
+#define EXAMPLE_ODES // whether to run example ODE problems
+#define EXAMPLE_PDES // whether to run example PDE problems
 #define VERBOSE true
 
 
@@ -28,6 +28,8 @@
 
 
 #include <ctime>
+#include <stdlib.h>
+#include <cmath>
 #include <thread>
 #include "Vars.h"
 #include "Addition.h"
@@ -52,6 +54,8 @@
 #define PI 3.14159265359
 #endif
 Fitness<double> heatPde(double tMax) {
+	// exact solution:
+	// u(x, t) = e^{- pi^2 t} sin(pi x)
 	return Fitness<double>(
 		[](FunctionParams<double> p) -> const double {
 			return p.ddx2 - p.ddy; // d^2/dx^2 u = d/dt u
