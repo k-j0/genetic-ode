@@ -5,7 +5,7 @@ The implementation presented here is in part adapted from [this paper by I. G. T
 
 ## Getting started
 
-The project can be opened and built as is with Visual Studio 2019 on Windows. Not tested on other operating systems at this time; the code is platform-agnostic and should compile without any issues with any C++14 compiler.
+The project can be opened and built as is with Visual Studio 2019 on Windows, or compiled with gcc through `make` (C++14).
 
 ## Todo
 
