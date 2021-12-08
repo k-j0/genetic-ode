@@ -211,7 +211,7 @@ inline bool GrammarDecoder<T>::decodeOperation(const std::vector<unsigned int>& 
 	if (!decodeExpression(sequence, ptr, wraps, b)) return false;
 
 	// decode the head into one of the available operations
-	outOperation = operations[head % functions.size()]->instantiate2Args(a, b);
+	outOperation = operations[head % operations.size()]->instantiate2Args(a, b);
 	assert(outOperation);
 
 	return true;

@@ -3,9 +3,9 @@
 
 //#define FULLY_RANDOM // whether to completely randomise the population every single generation
 //#define EXAMPLE_ODES // whether to run example ODE problems
-//#define EXAMPLE_NLODES // whether to run example NLODE problems
+#define EXAMPLE_NLODES // whether to run example NLODE problems
 //#define EXAMPLE_PDES // whether to run example PDE problems
-#define HEAT // whether to run the heat equation problem
+//#define HEAT // whether to run the heat equation problem
 #define VERBOSE true
 
 
@@ -44,6 +44,7 @@
 #include "Trig.h"
 #include "Exponential.h"
 #include "Logarithm.h"
+#include "SquareRoot.h"
 #include "GrammarDecoder.h"
 #include "Population.h"
 #if defined(EXAMPLE_ODES) or defined(EXAMPLE_NLODES)
@@ -137,7 +138,8 @@ int main() {
 		G1d(Sine),
 		G1d(Cosine),
 		G1d(Exponential),
-		G1d(Logarithm)
+		G1d(Logarithm),
+		G1d(SquareRoot)
 	};
 	auto decoder1d = new GrammarDecoder<double>(0, variables1d, operations, functions);
 	auto decoder2d = new GrammarDecoder<double>(0, variables2d, operations, functions);
