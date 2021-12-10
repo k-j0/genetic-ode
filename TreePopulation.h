@@ -107,11 +107,8 @@ inline TreePopulation<T>::TreePopulation(unsigned int n, float replicationRate, 
 	// Initialize population with random genes using the grammar
 	chromosomes = std::vector<TreeChromosome<T>>(n);
 	for (int i = 0; i < n; ++i) {
-		auto sequence = std::vector<unsigned int>(20);
-		for (int j = 0; j < sequence.size(); ++j) {
-			sequence[j] = RAND % 1000;
-		}
-		chromosomes[i].expression = decoder->decode(sequence);
+		// force initial expressions of the form 1 * (...)
+		chromosomes[i].expression = MultiplicationPtr(T, ConstantPtr(T, 1), decoder->instantiateExpression(rng, 5));
 	}
 
 }
@@ -127,7 +124,7 @@ inline const TreeChromosome<T>* TreePopulation<T>::nextGeneration() {
 			ch.fitness = INFINITY; // invalid expression, definitely don't want to keep this one
 		} else {
 			try {
-				ch.expression = ch.expression->simplify();
+				//ch.expression = ch.expression->simplify();
 				ch.fitness = fitnessFunction->fitness(ch.expression);
 			} catch (...) { // handle invalid expressions with /0, log(-1), etc.
 				ch.fitness = INFINITY;
@@ -152,9 +149,9 @@ inline const TreeChromosome<T>* TreePopulation<T>::nextGeneration() {
 				// replicate chromosome [j]
 				chromosomes[i].expression = chromosomes[j].expression;
 
-				// mutations
+				// mutations - note that we only mutate children, not parents
 
-				// modify random nodes in expression
+				// modify random nodes and subtrees in expression
 				chromosomes[i].expression = chromosomes[i].expression->mutate(rng, mutationRate, treeMutationRate, decoder);
 
 				break;
