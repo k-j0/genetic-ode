@@ -85,7 +85,7 @@
                         'Fitness: ' + data.generations[gen].fitness + (data.generations[gen].fitness == 0 ? ' (found analytical solution)' : '') + '<br>' +
                         'Expression: ' + data.generations[gen].expression;
 
-                setTimeout(next, 500);
+                setTimeout(next, 200);
             };
             next();
         }

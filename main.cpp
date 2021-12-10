@@ -2,8 +2,8 @@
 
 
 //#define FULLY_RANDOM // whether to completely randomise the population every single generation
-#define SINGLE_EXAMPLE_ODE 2 // whether to run one example ODE problem
-//#define EXAMPLE_ODES // whether to run example ODE problems
+//#define SINGLE_EXAMPLE_ODE 2 // whether to run one example ODE problem
+#define EXAMPLE_ODES // whether to run example ODE problems
 //#define EXAMPLE_NLODES // whether to run example NLODE problems
 //#define EXAMPLE_PDES // whether to run example PDE problems
 //#define HEAT // whether to run the heat equation problem
@@ -23,15 +23,15 @@
 #else
 	#define POPULATION_SIZE 1000
 	#define REPLICATION_RATE 0.1
-	#define MUTATION_RATE 0.05
-	#define GENERATIONS 2000
-#endif
+	#define MUTATION_RATE 0.1
+	#define GENERATIONS 10000
 #ifdef TREE_CHROMOSOMES
 	#define REPLICATION_BIAS 25
-	#define TREE_MUTATION_RATE 0.05
+	#define TREE_MUTATION_RATE 0.1
 #else
 	#define CHROMOSOME_SIZE 50
 	#define RANDOM_RATE 0.0
+#endif
 #endif
 
 
