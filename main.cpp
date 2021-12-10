@@ -39,7 +39,7 @@
 #include <cmath>
 #include <thread>
 #ifndef M_PI
-#define M_PI 3.14159265359
+	#define M_PI 3.14159265359
 #endif
 #include "Vars.h"
 #include "Addition.h"
@@ -88,6 +88,10 @@ Fitness<double> heatPde(double tMax) {
 
 
 
+/**
+ * Solves an ODE/PDE given its fitness function and a grammatical decoder
+ * This uses the parameters #define'd at the top of main.cpp
+ */
 void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<double>* decoder, int seed) {
 
 	// Init population
@@ -128,6 +132,8 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 		printf("d^2/dy^2 f(x, y) = %s\n\n", bestExpression->derivative(1)->derivative(1)->simplify()->toString().c_str());
 	}
 }
+
+
 
 
 int main() {
@@ -183,11 +189,13 @@ int main() {
 	}
 #endif
 
+	// solve 1D temporal heat equation problem
 #ifdef HEAT
 	threads.push_back(new std::thread(solve, "Heat", heatPde(1), decoder2d, 1337));
 #endif
 
 
+	// Run all threads until they terminate, then exit the program
 	for (auto it = threads.begin(); it != threads.end(); it++) {
 		(*it)->join();
 		delete* it;
