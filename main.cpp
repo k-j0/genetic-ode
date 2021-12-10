@@ -147,7 +147,7 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 #endif
 #ifdef JSON // add one json object to the array of generations each time a new best fit is found
 			json += "{\"generation\":" + std::to_string(gen) + ",\"fitness\":" + std::to_string(top->fitness) + ",";
-			json += "\"expression\":" + top->expression->toString() + ",\"jsExpression\":" + top->expression->toJsString() + "},";
+			json += "\"expression\":\"" + top->expression->toString() + "\",\"jsExpression\":\"" + top->expression->toJsString() + "\"},";
 #endif
 		}
 		if (top && top->fitness < 1e-7) {
