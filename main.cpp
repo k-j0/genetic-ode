@@ -91,6 +91,28 @@ Fitness<double> heatPde(double tMax) {
 	);
 }
 
+Fitness<double> heatPdeNoPi(double tMax) {
+	// exact solution:
+	// u(x, t) = e^{-t} sin(x)
+	return Fitness<double>(
+		[](FunctionParams<double> p) -> const double {
+			return p.ddx2 - p.ddy;
+		},
+		Domain<double>(0, M_PI, 50), Domain<double>(0, tMax, 50), 100,
+		{
+			Boundary<double>(0, 0, [](double t, double f, double dfdx, double ddfdx) -> double {
+				return -f; // u(0, t) = 0
+			}),
+			Boundary<double>(M_PI, 0, [](double t, double f, double dfdx, double ddfdx) -> double {
+				return -f; // u(pi, t) = 0
+			}),
+			Boundary<double>(0, 1, [](double x, double f, double dfdt, double ddfdt) -> double {
+				return f - sin(x); // u(x, 0) = sin(x)
+			})
+		}
+	);
+}
+
 
 
 
@@ -239,7 +261,7 @@ int main() {
 
 	// solve 1D temporal heat equation problem
 #ifdef HEAT
-	threads.push_back(new std::thread(solve, "Heat", heatPde(1), decoder2d, 1337));
+	threads.push_back(new std::thread(solve, "Heat", heatPdeNoPi(1), decoder2d, 1337));
 #endif
 
 
