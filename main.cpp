@@ -11,6 +11,7 @@
 
 
 #ifdef FULLY_RANDOM
+	#undef TREE_CHROMOSOMES
 	#define POPULATION_SIZE 5000
 	#define CHROMOSOME_SIZE 50
 	#define REPLICATION_RATE 0.0002
@@ -21,9 +22,12 @@
 	#define POPULATION_SIZE 1000
 	#define CHROMOSOME_SIZE 50
 	#define REPLICATION_RATE 0.1
-	#define MUTATION_RATE 0.05
+	#define MUTATION_RATE 0.2
 	#define RANDOM_RATE 0.0
 	#define GENERATIONS 2000
+#endif
+#ifdef TREE_CHROMOSOMES
+	#define REPLICATION_BIAS 25
 #endif
 
 
@@ -88,7 +92,7 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 
 	// Init population
 #ifdef TREE_CHROMOSOMES
-	TreePopulation<double> population(POPULATION_SIZE, REPLICATION_RATE, MUTATION_RATE, &fitnessFunction, decoder, seed);
+	TreePopulation<double> population(POPULATION_SIZE, REPLICATION_RATE, REPLICATION_BIAS, MUTATION_RATE, &fitnessFunction, decoder, seed);
 	const TreeChromosome<double>* top = nullptr;
 #else
 	Population<double> population(POPULATION_SIZE, CHROMOSOME_SIZE, REPLICATION_RATE, MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);

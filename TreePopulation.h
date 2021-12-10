@@ -45,6 +45,14 @@ private:
 	float replicationRate;
 
 	/**
+	 * Each consecutive parent chromosome, ordered from best to worst, has a 1/replicationBias chance to replicate into any one single child
+	 * i.e. if replicationBias = 2, the top performer has 1/2 chance, the second has 1/4, third has 1/8, etc
+	 *		if replicationBias = 5, the top performer has 1/5 chance (0.2), the second has 4/25 (0.16), third has 16/125 (0.128), etc
+	 *		if replicationBias = 20, the top performer has 1/20 chance (0.05), the second has 19/400 (0.0475), third has 361/8000 (0.045125), etc
+	 */
+	int replicationBias;
+
+	/**
 	 * Probability of mutation of any single gene
 	 */
 	float mutationRate;
@@ -69,7 +77,7 @@ public:
 	/**
 	 * Default constructor; initializes the population with random values for all of the genes
 	 */
-	TreePopulation(unsigned int n, float replicationRate, float mutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed = 0);
+	TreePopulation(unsigned int n, float replicationRate, int replicationBias, float mutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed = 0);
 
 	/**
 	 * Run through a single generation of the population
@@ -82,8 +90,8 @@ public:
 
 
 template<typename T>
-inline TreePopulation<T>::TreePopulation(unsigned int n, float replicationRate, float mutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed) :
-			replicationRate(replicationRate), mutationRate(mutationRate), fitnessFunction(fitnessFunction), decoder(decoder) {
+inline TreePopulation<T>::TreePopulation(unsigned int n, float replicationRate, int replicationBias, float mutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed) :
+			replicationRate(replicationRate), replicationBias(replicationBias), mutationRate(mutationRate), fitnessFunction(fitnessFunction), decoder(decoder) {
 
 	rng = std::mt19937(seed);
 
@@ -134,7 +142,7 @@ inline const TreeChromosome<T>* TreePopulation<T>::nextGeneration() {
 	for (int i = parentCount; i < chromosomes.size(); ++i) {
 		// replace chromosome with a parent selected at random
 		for (int j = 0; j < parentCount; ++j) {
-			if (RAND % 2 == 0 || j == parentCount-1) {
+			if (RAND % replicationBias == 0 || j == parentCount-1) {
 
 				// replicate chromosome [j]
 				chromosomes[i].expression = chromosomes[j].expression;
