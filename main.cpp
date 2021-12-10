@@ -2,11 +2,12 @@
 
 
 //#define FULLY_RANDOM // whether to completely randomise the population every single generation
+#define SINGLE_EXAMPLE_ODE // whether to run one example ODE problem
 //#define EXAMPLE_ODES // whether to run example ODE problems
 //#define EXAMPLE_NLODES // whether to run example NLODE problems
 //#define EXAMPLE_PDES // whether to run example PDE problems
-#define HEAT // whether to run the heat equation problem
-#define VERBOSE true
+//#define HEAT // whether to run the heat equation problem
+#define VERBOSE // whether to output console messages while training each time a new best fit is found amongst the population
 #define TREE_CHROMOSOMES // whether to use a TreePopulation instead of the grammar-based population
 
 
@@ -22,12 +23,13 @@
 	#define POPULATION_SIZE 1000
 	#define CHROMOSOME_SIZE 50
 	#define REPLICATION_RATE 0.1
-	#define MUTATION_RATE 0.2
+	#define MUTATION_RATE 0.05
 	#define RANDOM_RATE 0.0
 	#define GENERATIONS 2000
 #endif
 #ifdef TREE_CHROMOSOMES
 	#define REPLICATION_BIAS 25
+	#define TREE_MUTATION_RATE 0.05
 #endif
 
 
@@ -54,7 +56,7 @@
 #include "GrammarDecoder.h"
 #include "Population.h"
 #include "TreePopulation.h"
-#if defined(EXAMPLE_ODES) or defined(EXAMPLE_NLODES)
+#if defined(EXAMPLE_ODES) or defined(EXAMPLE_NLODES) or defined(SINGLE_EXAMPLE_ODE)
 	#include "ExampleODEs.h"
 #endif
 #ifdef EXAMPLE_PDES
@@ -96,7 +98,7 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 
 	// Init population
 #ifdef TREE_CHROMOSOMES
-	TreePopulation<double> population(POPULATION_SIZE, REPLICATION_RATE, REPLICATION_BIAS, MUTATION_RATE, &fitnessFunction, decoder, seed);
+	TreePopulation<double> population(POPULATION_SIZE, REPLICATION_RATE, REPLICATION_BIAS, MUTATION_RATE, TREE_MUTATION_RATE, &fitnessFunction, decoder, seed);
 	const TreeChromosome<double>* top = nullptr;
 #else
 	Population<double> population(POPULATION_SIZE, CHROMOSOME_SIZE, REPLICATION_RATE, MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);
@@ -112,9 +114,9 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 		if (top && top->fitness < fitness) {
 			fitness = top->fitness;
 			bestExpression = top->expression;
-			if (VERBOSE) {
-				printf("%s \tGen. %d, \tfitness %f, \tf(x, y) = %s\n", name.c_str(), gen, fitness, top->expression->toString().c_str());
-			}
+#ifdef VERBOSE
+			printf("%s \tGen. %d, \tfitness %f, \tf(x, y) = %s\n", name.c_str(), gen, fitness, top->expression->toString().c_str());
+#endif
 		}
 		if (top && top->fitness < 1e-7) {
 			break;
@@ -169,6 +171,9 @@ int main() {
 
 
 	// solve example ODEs from the original paper
+#if defined(SINGLE_EXAMPLE_ODE) and not defined(EXAMPLE_ODES)
+	threads.push_back(new std::thread(solve, "ODE1", getExampleODE(1), decoder1d, 0));
+#endif
 #ifdef EXAMPLE_ODES
 	for (int i = 1; i <= 9; ++i) {
 		threads.push_back(new std::thread(solve, "ODE" + std::to_string(i), getExampleODE(i), decoder1d, i));
@@ -193,6 +198,21 @@ int main() {
 #ifdef HEAT
 	threads.push_back(new std::thread(solve, "Heat", heatPde(1), decoder2d, 1337));
 #endif
+
+	/*
+	std::shared_ptr<Expression<double>> expr = decoder2d->decode({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 });
+	std::mt19937 rng(10);
+	for (int i = 0; i < 1000; ++i) {
+		try {
+			expr = expr->simplify();
+			printf("f(x, y) = %s\n\n", expr->toString().c_str());
+			expr = expr->mutate(rng, 0.01, 0.01, decoder2d);
+		} catch (...) {
+			printf("f(x, y) = (invalid)\n\n");
+			break;
+		}
+	}
+	*/
 
 
 	// Run all threads until they terminate, then exit the program

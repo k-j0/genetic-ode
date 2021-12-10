@@ -21,7 +21,7 @@ public:
 
 	bool isConstant() const override { return a->isConstant() && b->isConstant(); }
 
-	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
 };
 #define MultiplicationPtr(T, a, b) ExpressionPtr<T>(new Multiplication<T>(a, b))
 #define MultiplicationPtrf(a, b) MultiplicationPtr(float, a, b)
@@ -65,9 +65,10 @@ inline ExpressionPtr<T> Multiplication<T>::simplify() const {
 }
 
 template<typename T>
-inline ExpressionPtr<T> Multiplication<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
-	auto newA = a->mutate(rng, mutationChance, grammar);
-	auto newB = b->mutate(rng, mutationChance, grammar);
+inline ExpressionPtr<T> Multiplication<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const {
+	TREE_MUTATION();
+	auto newA = a->mutate(rng, mutationChance, treeMutationChance, grammar);
+	auto newB = b->mutate(rng, mutationChance, treeMutationChance, grammar);
 	if (MUTATION) {
 		return grammar->instantiateOperation(newA, newB, rng);
 	}

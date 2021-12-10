@@ -6,7 +6,8 @@
 #include <random>
 #include <cmath>
 
-#define MUTATION (abs(int(rng()) % 10000) < int(mutationChance * 10000))
+#define TREE_MUTATION() if (abs(int(rng())) % 10000 < int(treeMutationChance * 10000)) return grammar->instantiateExpression(rng);
+#define MUTATION (abs(int(rng())) % 10000 < int(mutationChance * 10000))
 #define RAND_NEG1_1 double(abs(int(rng)) % 1000) / 500 - 0.5
 
 template<typename T>
@@ -45,7 +46,7 @@ public:
 	/**
 	 * Potentially mutates the expression or one of its sub-nodes with a random probability, for use in genetic algorithms
 	 */
-	virtual const std::shared_ptr<Expression<T>> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const = 0;
+	virtual const std::shared_ptr<Expression<T>> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const = 0;
 
 };
 template<typename T>
@@ -76,7 +77,7 @@ public:
 
 	bool isConstant() const override { return true; }
 
-	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
 };
 #define ConstantPtr(T, v) ExpressionPtr<T>(new Constant<T>(v))
 #define ConstantPtrf(v) ConstantPtr(float, v)
@@ -101,7 +102,8 @@ inline ExpressionPtr<T> Constant<T>::simplify() const {
 }
 
 template<typename T>
-inline ExpressionPtr<T> Constant<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
+inline ExpressionPtr<T> Constant<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const {
+	TREE_MUTATION();
 	T value = v;
 	if (MUTATION) {
 		std::normal_distribution<T> n(0, 1);

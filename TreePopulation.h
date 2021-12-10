@@ -58,6 +58,11 @@ private:
 	float mutationRate;
 
 	/**
+	 * Probability of mutation of a sub-tree
+	 */
+	float treeMutationRate;
+
+	/**
 	 * Fitness function, which encodes the problem at hand
 	 */
 	const Fitness<T>* fitnessFunction;
@@ -77,7 +82,7 @@ public:
 	/**
 	 * Default constructor; initializes the population with random values for all of the genes
 	 */
-	TreePopulation(unsigned int n, float replicationRate, int replicationBias, float mutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed = 0);
+	TreePopulation(unsigned int n, float replicationRate, int replicationBias, float mutationRate, float treeMutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed = 0);
 
 	/**
 	 * Run through a single generation of the population
@@ -90,8 +95,8 @@ public:
 
 
 template<typename T>
-inline TreePopulation<T>::TreePopulation(unsigned int n, float replicationRate, int replicationBias, float mutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed) :
-			replicationRate(replicationRate), replicationBias(replicationBias), mutationRate(mutationRate), fitnessFunction(fitnessFunction), decoder(decoder) {
+inline TreePopulation<T>::TreePopulation(unsigned int n, float replicationRate, int replicationBias, float mutationRate, float treeMutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed) :
+			replicationRate(replicationRate), replicationBias(replicationBias), mutationRate(mutationRate), treeMutationRate(treeMutationRate), fitnessFunction(fitnessFunction), decoder(decoder) {
 
 	rng = std::mt19937(seed);
 
@@ -150,7 +155,7 @@ inline const TreeChromosome<T>* TreePopulation<T>::nextGeneration() {
 				// mutations
 
 				// modify random nodes in expression
-				chromosomes[i].expression = chromosomes[i].expression->mutate(rng, mutationRate, decoder);
+				chromosomes[i].expression = chromosomes[i].expression->mutate(rng, mutationRate, treeMutationRate, decoder);
 
 				break;
 			}

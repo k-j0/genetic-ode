@@ -116,6 +116,8 @@ public:
 	const ExpressionPtr<T> instantiateFunction(const ExpressionPtr<T> a, std::mt19937& rng) const;
 	const ExpressionPtr<T> instantiateOperation(const ExpressionPtr<T> a, const ExpressionPtr<T> b, std::mt19937& rng) const;
 	const ExpressionPtr<T> instantiateVar(std::mt19937& rng) const;
+	const ExpressionPtr<T> instantiateConstant(std::mt19937& rng) const;
+	const ExpressionPtr<T> instantiateExpression(std::mt19937& rng, int maxDepth = 3, int depth = 0) const;
 
 private:
 
@@ -174,6 +176,30 @@ inline const ExpressionPtr<T> GrammarDecoder<T>::instantiateOperation(const Expr
 template<typename T>
 inline const ExpressionPtr<T> GrammarDecoder<T>::instantiateVar(std::mt19937& rng) const {
 	return variables[abs(int(rng())) % variables.size()]->instantiate0Args();
+}
+
+template<typename T>
+inline const ExpressionPtr<T> GrammarDecoder<T>::instantiateConstant(std::mt19937& rng) const {
+	T cnstnt = T(abs(int(rng())) % 22 - 10); // 0..21 -> -10..11
+	if (cnstnt == 11) cnstnt = M_PI; // -10..10 OR pi
+	return ConstantPtr(T, cnstnt);
+}
+
+template<typename T>
+inline const ExpressionPtr<T> GrammarDecoder<T>::instantiateExpression(std::mt19937& rng, int maxDepth, int depth) const {
+	if (depth >= maxDepth) { // prevent creating sub-trees too deeply nested
+		return abs(int(rng())) % 2 == 0 ? instantiateConstant(rng) : instantiateVar(rng);
+	}
+	switch (abs(int(rng())) % 4) {
+	case 0:
+		return instantiateConstant(rng);
+	case 1:
+		return instantiateVar(rng);
+	case 2:
+		return instantiateFunction(instantiateExpression(rng, maxDepth, depth+1), rng);
+	case 3:
+		return instantiateOperation(instantiateExpression(rng, maxDepth, depth+1), instantiateExpression(rng, maxDepth, depth+1), rng);
+	}
 }
 
 template<typename T>

@@ -18,7 +18,7 @@ public:
 
 	bool isConstant() const override { return false; }
 
-	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
 
 };
 #define VarXPtr(T) ExpressionPtr<T>(new VarX<T>())
@@ -41,7 +41,7 @@ public:
 
 	bool isConstant() const override { return false; }
 
-	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
 
 };
 #define VarYPtr(T) ExpressionPtr<T>(new VarY<T>())
@@ -49,7 +49,8 @@ public:
 #define VarYPtrd VarYPtr(double)
 
 template<typename T>
-inline ExpressionPtr<T> VarX<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
+inline ExpressionPtr<T> VarX<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const {
+	TREE_MUTATION();
 	if (MUTATION) {
 		return grammar->instantiateVar(rng);
 	}
@@ -57,7 +58,8 @@ inline ExpressionPtr<T> VarX<T>::mutate(std::mt19937& rng, double mutationChance
 }
 
 template<typename T>
-inline ExpressionPtr<T> VarY<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
+inline ExpressionPtr<T> VarY<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const {
+	TREE_MUTATION();
 	if (MUTATION) {
 		return grammar->instantiateVar(rng);
 	}
