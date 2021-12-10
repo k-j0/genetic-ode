@@ -170,6 +170,7 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 
 	// close json string and output to file
 #ifdef JSON
+	json = json.substr(0, json.length() - 1); // remove last trailing comma
 	json += "]}";
 	FileWriter::Write("results/" + name + "_" + std::to_string(time(nullptr)) + ".json", json);
 #endif

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genetic Algorithm Differential Equation Solver</title>
+    <style>
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -100;
+        }
+        input {
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <input type="file" name="import" id="import">
+    <script type="module">
+
+        import * as THREE from 'https://cdn.skypack.dev/three@0.133.1';
+
+        // init renderer
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            preserveDrawingBuffer: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        let width = 10;
+        let height = window.innerHeight / window.innerWidth * width;
+        document.body.append(renderer.domElement);
+        const camera = new THREE.OrthographicCamera(-width/2, width/2, height/2, -height/2, 1, 100);
+
+        // display expression
+        function displayExpression (expr, colour) {
+
+            // iterate over points & sample function
+            let points = [];
+            for (let i = -width/2; i <= width/2; i += 0.05) {
+                let x = i;
+                let y = eval(expr);
+                points.push(new THREE.Vector3(x, y, -10));
+            }
+
+            // render
+            let geometry = (new THREE.BufferGeometry()).setFromPoints(points);
+            let line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: colour }));
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color('white');
+            scene.add(line);
+            renderer.render(scene, camera);
+
+        }
+
+        displayExpression("Math.sin(x)", 'red');
+
+        // import from json
+        document.getElementById('import').addEventListener('change', (e) => {
+            let input = event.target;
+
+            let reader = new FileReader();
+            reader.onload = () => {
+                let result = JSON.parse(reader.result);
+                console.log(result);
+            };
+            reader.readAsText(input.files[0]);
+        });
+
+    </script>
+</body>
+</html>
