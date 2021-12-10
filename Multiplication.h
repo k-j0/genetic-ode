@@ -19,6 +19,8 @@ public:
 
 	std::string toString() const override { return "(" + a->toString() + " * " + b->toString() + ")"; }
 
+	std::string toJsString() const override { return "(" + a->toJsString() + " * " + b->toJsString() + ")"; }
+
 	bool isConstant() const override { return a->isConstant() && b->isConstant(); }
 
 	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;

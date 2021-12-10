@@ -8,6 +8,7 @@
 //#define EXAMPLE_PDES // whether to run example PDE problems
 //#define HEAT // whether to run the heat equation problem
 #define VERBOSE // whether to output console messages while training each time a new best fit is found amongst the population
+#define JSON // whether to output a json file for each executed run
 #define TREE_CHROMOSOMES // whether to use a TreePopulation instead of the grammar-based population
 
 
@@ -21,15 +22,16 @@
 	#define GENERATIONS 1000
 #else
 	#define POPULATION_SIZE 1000
-	#define CHROMOSOME_SIZE 50
 	#define REPLICATION_RATE 0.1
 	#define MUTATION_RATE 0.05
-	#define RANDOM_RATE 0.0
 	#define GENERATIONS 2000
 #endif
 #ifdef TREE_CHROMOSOMES
 	#define REPLICATION_BIAS 25
 	#define TREE_MUTATION_RATE 0.05
+#else
+	#define CHROMOSOME_SIZE 50
+	#define RANDOM_RATE 0.0
 #endif
 
 
@@ -62,6 +64,7 @@
 #ifdef EXAMPLE_PDES
 	#include "ExamplePDEs.h"
 #endif
+#include "FileWriter.h"
 
 
 
@@ -96,6 +99,7 @@ Fitness<double> heatPde(double tMax) {
  */
 void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<double>* decoder, int seed) {
 
+
 	// Init population
 #ifdef TREE_CHROMOSOMES
 	TreePopulation<double> population(POPULATION_SIZE, REPLICATION_RATE, REPLICATION_BIAS, MUTATION_RATE, TREE_MUTATION_RATE, &fitnessFunction, decoder, seed);
@@ -104,6 +108,30 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 	Population<double> population(POPULATION_SIZE, CHROMOSOME_SIZE, REPLICATION_RATE, MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);
 	const Chromosome<double>* top = nullptr;
 #endif
+
+
+	// create json string with results (hard-coded json structure since it's kept fairly simple)
+#ifdef JSON
+	std::string json = "{\"time\":" + std::to_string(time(nullptr)) + ",\"seed\":" + std::to_string(seed) + ",\"problem\":\"" + name + "\",\"useTrees\":";
+#ifdef TREE_CHROMOSOMES
+	json += "true,";
+#else
+	json += "false,";
+#endif
+	json += "\"populationSize\":" + std::to_string(POPULATION_SIZE) + ",";
+	json += "\"replicationRate\":" + std::to_string(REPLICATION_RATE) + ",";
+	json += "\"mutationRate\":" + std::to_string(MUTATION_RATE) + ",";
+	json += "\"maxGeneration\":" + std::to_string(GENERATIONS) + ",";
+#ifdef TREE_CHROMOSOMES
+	json += "\"replicationBias\":" + std::to_string(REPLICATION_BIAS) + ",";
+	json += "\"treeMutationRate\":" + std::to_string(TREE_MUTATION_RATE) + ",";
+#else
+	json += "\"chromosomeSize\":" + std::to_string(CHROMOSOME_SIZE) + ",";
+	json += "\"randomRate\":" + std::to_string(RANDOM_RATE) + ",";
+#endif
+	json += "\"generations\":[";
+#endif
+
 
 	// Iterate over generations
 	int gen;
@@ -117,12 +145,17 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 #ifdef VERBOSE
 			printf("%s \tGen. %d, \tfitness %f, \tf(x, y) = %s\n", name.c_str(), gen, fitness, top->expression->toString().c_str());
 #endif
+#ifdef JSON // add one json object to the array of generations each time a new best fit is found
+			json += "{\"generation\":" + std::to_string(gen) + ",\"fitness\":" + std::to_string(top->fitness) + ",";
+			json += "\"expression\":" + top->expression->toString() + ",\"jsExpression\":" + top->expression->toJsString() + "},";
+#endif
 		}
 		if (top && top->fitness < 1e-7) {
 			break;
 		}
 	}
 	
+
 	// Log result
 	if (!top) {
 		printf("Could not solve %s, null result.\n\n", name.c_str());
@@ -133,6 +166,14 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 		printf("d^2/dx^2 f(x, y) = %s\n", bestExpression->derivative(0)->derivative(0)->simplify()->toString().c_str());
 		printf("d^2/dy^2 f(x, y) = %s\n\n", bestExpression->derivative(1)->derivative(1)->simplify()->toString().c_str());
 	}
+
+
+	// close json string and output to file
+#ifdef JSON
+	json += "]}";
+	FileWriter::Write("results/" + name + "_" + std::to_string(time(nullptr)) + ".json", json);
+#endif
+
 }
 
 
@@ -198,21 +239,6 @@ int main() {
 #ifdef HEAT
 	threads.push_back(new std::thread(solve, "Heat", heatPde(1), decoder2d, 1337));
 #endif
-
-	/*
-	std::shared_ptr<Expression<double>> expr = decoder2d->decode({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 });
-	std::mt19937 rng(10);
-	for (int i = 0; i < 1000; ++i) {
-		try {
-			expr = expr->simplify();
-			printf("f(x, y) = %s\n\n", expr->toString().c_str());
-			expr = expr->mutate(rng, 0.01, 0.01, decoder2d);
-		} catch (...) {
-			printf("f(x, y) = (invalid)\n\n");
-			break;
-		}
-	}
-	*/
 
 
 	// Run all threads until they terminate, then exit the program

@@ -39,6 +39,11 @@ public:
 	virtual std::string toString() const = 0;
 
 	/**
+	 * Returns a string representation of the expression that can be evaluated by JavaScript without further modifications
+	 */
+	virtual std::string toJsString() const = 0;
+
+	/**
 	 * Returns whether the given expression is constant (i.e. y(x) = y(0) for all x in R)
 	 */
 	virtual bool isConstant() const = 0;
@@ -74,6 +79,8 @@ public:
 	ExpressionPtr<T> simplify() const override;
 
 	std::string toString() const override { return std::to_string(v); }
+
+	std::string toJsString() const override { return std::to_string(v); }
 
 	bool isConstant() const override { return true; }
 

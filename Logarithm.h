@@ -20,6 +20,8 @@ public:
 
 	std::string toString() const override { return "log(" + a->toString() + ")"; }
 
+	std::string toJsString() const override { return "Math.log(" + a->toJsString() + ")"; }
+
 	bool isConstant() const override { return a->isConstant(); }
 
 	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;

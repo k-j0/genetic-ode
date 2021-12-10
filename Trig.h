@@ -19,6 +19,8 @@ public:
 
 	std::string toString() const override { return "sin(" + a->toString() + ")"; }
 
+	std::string toJsString() const override { return "Math.sin(" + a->toJsString() + ")"; }
+
 	bool isConstant() const override { return a->isConstant(); }
 
 	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
@@ -43,6 +45,8 @@ public:
 	ExpressionPtr<T> simplify() const override;
 
 	std::string toString() const override { return "cos(" + a->toString() + ")"; }
+
+	std::string toJsString() const override { return "Math.cos(" + a->toJsString() + ")"; }
 
 	bool isConstant() const override { return a->isConstant(); }
 

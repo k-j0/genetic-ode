@@ -80,5 +80,8 @@
     <ClInclude Include="Trig.h">
       <Filter>Header Files\expressions\functions</Filter>
     </ClInclude>
+    <ClInclude Include="FileWriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

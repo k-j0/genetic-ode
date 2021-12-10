@@ -16,6 +16,8 @@ public:
 
 	std::string toString() const override { return "x"; }
 
+	std::string toJsString() const override { return toString(); }
+
 	bool isConstant() const override { return false; }
 
 	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
@@ -38,6 +40,8 @@ public:
 	inline ExpressionPtr<T> simplify() const override { return ExpressionPtr<T>(new VarY<T>()); }
 
 	std::string toString() const override { return "y"; }
+
+	std::string toJsString() const override { return toString(); }
 
 	bool isConstant() const override { return false; }
 

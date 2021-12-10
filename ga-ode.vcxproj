@@ -148,6 +148,7 @@
     <ClInclude Include="ExamplePDEs.h" />
     <ClInclude Include="Exponential.h" />
     <ClInclude Include="Expression.h" />
+    <ClInclude Include="FileWriter.h" />
     <ClInclude Include="Fitness.h" />
     <ClInclude Include="GrammarDecoder.h" />
     <ClInclude Include="Logarithm.h" />
