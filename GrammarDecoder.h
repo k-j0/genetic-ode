@@ -197,7 +197,7 @@ inline const ExpressionPtr<T> GrammarDecoder<T>::instantiateExpression(std::mt19
 		return instantiateVar(rng);
 	case 2:
 		return instantiateFunction(instantiateExpression(rng, maxDepth, depth+1), rng);
-	case 3:
+	default:
 		return instantiateOperation(instantiateExpression(rng, maxDepth, depth+1), instantiateExpression(rng, maxDepth, depth+1), rng);
 	}
 }
