@@ -76,7 +76,7 @@ Fitness<double> heatPde(double tMax) {
 		[](FunctionParams<double> p) -> const double {
 			return p.ddx2 - p.ddy; // d^2/dx^2 u = d/dt u
 		},
-		Domain<double>(0, 1, 50), Domain<double>(0, tMax, 50), 1,
+		Domain<double>(0, 1, 50), Domain<double>(0, tMax, 50), 100,
 		{
 			Boundary<double>(0, 0, [](double t, double f, double dfdx, double ddfdx) -> double {
 				return -f; // u(0, t) = 0

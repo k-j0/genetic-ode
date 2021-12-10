@@ -9,7 +9,7 @@ Fitness<double> pde1() {
 		[](FunctionParams<double> p) -> const double {
 			return -p.ddx2-p.ddy2 + exp(-p.x) * (p.x - 2 + p.y*p.y*p.y + 6 * p.y);
 		},
-		DOMAIN01, DOMAIN01, 1,
+		DOMAIN01, DOMAIN01, 100,
 		{
 			Boundary<double>(0, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
 				return -f + y * y * y; // psi(0, y) = y^3
@@ -32,7 +32,7 @@ Fitness<double> pde2() {
 		[](FunctionParams<double> p) -> const double {
 			return -p.ddx2 - p.ddy2 - 2 * p.f;
 		},
-		DOMAIN01, DOMAIN01, 1,
+		DOMAIN01, DOMAIN01, 100,
 		{
 			Boundary<double>(0, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
 				return -f + 0; // psi(0, y) = 0
@@ -55,7 +55,7 @@ Fitness<double> pde3() {
 		[](FunctionParams<double> p) -> const double {
 			return p.ddx2 + p.ddy2 - 4;
 		},
-		DOMAIN01, DOMAIN01, 1,
+		DOMAIN01, DOMAIN01, 100,
 		{
 			Boundary<double>(0, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
 				return -f + y * y + y + 1; // psi(0, y) = y^2 + y + 1
@@ -78,7 +78,7 @@ Fitness<double> pde4() {
 		[](FunctionParams<double> p) -> const double {
 			return -p.ddx2 - p.ddy2 - (p.x*p.x + p.y*p.y) * p.f;
 		},
-		DOMAIN01, DOMAIN01, 1,
+		DOMAIN01, DOMAIN01, 100,
 		{
 			Boundary<double>(0, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
 				return -f + 0; // psi(0, y) = 0
@@ -101,7 +101,7 @@ Fitness<double> pde5() {
 		[](FunctionParams<double> p) -> const double {
 			return -p.ddx2 - p.ddy2 + (p.x - 2) * exp(-p.x) + p.x * exp(-p.y);
 		},
-		DOMAIN01, DOMAIN01, 1,
+		DOMAIN01, DOMAIN01, 100,
 		{
 			Boundary<double>(0, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
 				return -f + 0; // psi(0, y) = 0
@@ -124,7 +124,7 @@ Fitness<double> pde6() {
 		[](FunctionParams<double> p) -> const double {
 			return -p.ddx2 - p.ddy2 - exp(p.f) + 1 + p.x * p.x + p.y * p.y + 4 / ((1 + p.x * p.x + p.y * p.y) * (1 + p.x * p.x + p.y * p.y));
 		},
-		DOMAIN01, DOMAIN01, 1,
+		DOMAIN01, DOMAIN01, 100,
 		{
 			Boundary<double>(0, 0, [](double y, double f, double dfdx, double ddfdx) -> double {
 				return -f + log(1 + y * y); // psi(0, y) = log(1+y^2)
