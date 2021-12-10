@@ -17,10 +17,19 @@
         input {
             z-index: 100;
         }
+        div {
+            z-index: 100;
+            padding: 20px;
+            font-size: 1.2em;
+            font-family: sans-serif;
+        }
     </style>
 </head>
 <body>
     <input type="file" name="import" id="import">
+    <div id='results'>
+        Select a json file exported from one of the runs of the C++ executable to get started.
+    </div>
     <script type="module">
 
         import * as THREE from 'https://cdn.skypack.dev/three@0.133.1';
@@ -31,7 +40,7 @@
             preserveDrawingBuffer: true
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        let width = 10;
+        let width = 20;
         let height = window.innerHeight / window.innerWidth * width;
         document.body.append(renderer.domElement);
         const camera = new THREE.OrthographicCamera(-width/2, width/2, height/2, -height/2, 1, 100);
@@ -43,7 +52,7 @@
             let points = [];
             for (let i = -width/2; i <= width/2; i += 0.05) {
                 let x = i;
-                let y = eval(expr);
+                let y = eval(expr) * 0.25;
                 points.push(new THREE.Vector3(x, y, -10));
             }
 
@@ -56,8 +65,30 @@
             renderer.render(scene, camera);
 
         }
+        displayExpression('Math.sin(x)', 'grey');
 
-        displayExpression("Math.sin(x)", 'red');
+        // animate expressions being found from generation to generation
+        function displaySearch (data) {
+            let gen = 0;
+            let next = () => {
+                ++gen;
+                if (gen >= data.generations.length) return;
+
+                // display the current expression
+                displayExpression(data.generations[gen].jsExpression, 'red');
+                document.getElementById('results').innerHTML =
+                        'Problem: ' + data.problem + ' (seed = ' + data.seed + ')<br>' +
+                        'Method: ' + (data.useTrees ? 'ours' : 'original') + '<br>' +
+                        'Population size: ' + data.populationSize + '<br>' +
+                        '---<br>' +
+                        'Generation: ' + data.generations[gen].generation + '<br>' +
+                        'Fitness: ' + data.generations[gen].fitness + (data.generations[gen].fitness == 0 ? ' (found analytical solution)' : '') + '<br>' +
+                        'Expression: ' + data.generations[gen].expression;
+
+                setTimeout(next, 500);
+            };
+            next();
+        }
 
         // import from json
         document.getElementById('import').addEventListener('change', (e) => {
@@ -66,7 +97,10 @@
             let reader = new FileReader();
             reader.onload = () => {
                 let result = JSON.parse(reader.result);
-                console.log(result);
+                if (result) {
+                    displaySearch(result);
+                    console.log(result);
+                }
             };
             reader.readAsText(input.files[0]);
         });
