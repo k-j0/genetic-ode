@@ -88,7 +88,7 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 
 	// Init population
 #ifdef TREE_CHROMOSOMES
-	TreePopulation<double> population(POPULATION_SIZE, &fitnessFunction, decoder, seed);
+	TreePopulation<double> population(POPULATION_SIZE, REPLICATION_RATE, MUTATION_RATE, &fitnessFunction, decoder, seed);
 	const TreeChromosome<double>* top = nullptr;
 #else
 	Population<double> population(POPULATION_SIZE, CHROMOSOME_SIZE, REPLICATION_RATE, MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);

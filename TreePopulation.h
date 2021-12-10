@@ -40,6 +40,16 @@ private:
 	int generation = 0;
 
 	/**
+	 * Percentage of individuals that will create children
+	 */
+	float replicationRate;
+
+	/**
+	 * Probability of mutation of any single gene
+	 */
+	float mutationRate;
+
+	/**
 	 * Fitness function, which encodes the problem at hand
 	 */
 	const Fitness<T>* fitnessFunction;
@@ -59,7 +69,7 @@ public:
 	/**
 	 * Default constructor; initializes the population with random values for all of the genes
 	 */
-	TreePopulation(unsigned int n, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed = 0);
+	TreePopulation(unsigned int n, float replicationRate, float mutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed = 0);
 
 	/**
 	 * Run through a single generation of the population
@@ -72,7 +82,8 @@ public:
 
 
 template<typename T>
-inline TreePopulation<T>::TreePopulation(unsigned int n, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed) : fitnessFunction(fitnessFunction), decoder(decoder) {
+inline TreePopulation<T>::TreePopulation(unsigned int n, float replicationRate, float mutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed) :
+			replicationRate(replicationRate), mutationRate(mutationRate), fitnessFunction(fitnessFunction), decoder(decoder) {
 
 	rng = std::mt19937(seed);
 
@@ -118,10 +129,23 @@ inline const TreeChromosome<T>* TreePopulation<T>::nextGeneration() {
 
 	// Genetic operations
 
-	// Modify random nodes in expressions
-	for (auto& ch : chromosomes) {
-		if (ch.expression) {
-			ch.expression = ch.expression->mutate(rng, 0.1, decoder);
+	// Replication
+	unsigned int parentCount = int(replicationRate * chromosomes.size());
+	for (int i = parentCount; i < chromosomes.size(); ++i) {
+		// replace chromosome with a parent selected at random
+		for (int j = 0; j < parentCount; ++j) {
+			if (RAND % 2 == 0 || j == parentCount-1) {
+
+				// replicate chromosome [j]
+				chromosomes[i].expression = chromosomes[j].expression;
+
+				// mutations
+
+				// modify random nodes in expression
+				chromosomes[i].expression = chromosomes[i].expression->mutate(rng, mutationRate, decoder);
+
+				break;
+			}
 		}
 	}
 
