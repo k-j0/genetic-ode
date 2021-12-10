@@ -2,7 +2,7 @@
 
 
 //#define FULLY_RANDOM // whether to completely randomise the population every single generation
-#define SINGLE_EXAMPLE_ODE // whether to run one example ODE problem
+#define SINGLE_EXAMPLE_ODE 2 // whether to run one example ODE problem
 //#define EXAMPLE_ODES // whether to run example ODE problems
 //#define EXAMPLE_NLODES // whether to run example NLODE problems
 //#define EXAMPLE_PDES // whether to run example PDE problems
@@ -172,7 +172,7 @@ int main() {
 
 	// solve example ODEs from the original paper
 #if defined(SINGLE_EXAMPLE_ODE) and not defined(EXAMPLE_ODES)
-	threads.push_back(new std::thread(solve, "ODE1", getExampleODE(1), decoder1d, 0));
+	threads.push_back(new std::thread(solve, "ODE" + std::to_string(SINGLE_EXAMPLE_ODE), getExampleODE(SINGLE_EXAMPLE_ODE), decoder1d, 0));
 #endif
 #ifdef EXAMPLE_ODES
 	for (int i = 1; i <= 9; ++i) {
