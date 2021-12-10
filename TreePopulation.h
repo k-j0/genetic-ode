@@ -63,6 +63,11 @@ private:
 	float treeMutationRate;
 
 	/**
+	 * Proportion of the population that will be replaced with completely random expressions each generation
+	 */
+	float randomRate;
+
+	/**
 	 * Fitness function, which encodes the problem at hand
 	 */
 	const Fitness<T>* fitnessFunction;
@@ -82,7 +87,7 @@ public:
 	/**
 	 * Default constructor; initializes the population with random values for all of the genes
 	 */
-	TreePopulation(unsigned int n, float replicationRate, int replicationBias, float mutationRate, float treeMutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed = 0);
+	TreePopulation(unsigned int n, float replicationRate, int replicationBias, float mutationRate, float treeMutationRate, float randomRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed = 0);
 
 	/**
 	 * Run through a single generation of the population
@@ -95,8 +100,8 @@ public:
 
 
 template<typename T>
-inline TreePopulation<T>::TreePopulation(unsigned int n, float replicationRate, int replicationBias, float mutationRate, float treeMutationRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed) :
-			replicationRate(replicationRate), replicationBias(replicationBias), mutationRate(mutationRate), treeMutationRate(treeMutationRate), fitnessFunction(fitnessFunction), decoder(decoder) {
+inline TreePopulation<T>::TreePopulation(unsigned int n, float replicationRate, int replicationBias, float mutationRate, float treeMutationRate, float randomRate, const Fitness<T>* fitnessFunction, const GrammarDecoder<T>* decoder, unsigned int seed) :
+			replicationRate(replicationRate), replicationBias(replicationBias), mutationRate(mutationRate), treeMutationRate(treeMutationRate), randomRate(randomRate), fitnessFunction(fitnessFunction), decoder(decoder) {
 
 	rng = std::mt19937(seed);
 
@@ -141,7 +146,8 @@ inline const TreeChromosome<T>* TreePopulation<T>::nextGeneration() {
 
 	// Replication
 	unsigned int parentCount = int(replicationRate * chromosomes.size());
-	for (int i = parentCount; i < chromosomes.size(); ++i) {
+	unsigned int randomCount = int(randomRate * chromosomes.size());
+	for (int i = parentCount; i < chromosomes.size() - randomCount; ++i) {
 		// replace chromosome with a parent selected at random
 		for (int j = 0; j < parentCount; ++j) {
 			if (RAND % replicationBias == 0 || j == parentCount-1) {
@@ -157,6 +163,11 @@ inline const TreeChromosome<T>* TreePopulation<T>::nextGeneration() {
 				break;
 			}
 		}
+	}
+
+	// Random individuals
+	for (int i = chromosomes.size() - randomCount; i < chromosomes.size(); ++i) {
+		chromosomes[i].expression = MultiplicationPtr(T, ConstantPtr(T, 1), decoder->instantiateExpression(rng, 5));
 	}
 
 	// Return top performer

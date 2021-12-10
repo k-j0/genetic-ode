@@ -2,11 +2,11 @@
 
 
 //#define FULLY_RANDOM // whether to completely randomise the population every single generation
-#define SINGLE_EXAMPLE_ODE 3 // whether to run one example ODE problem
+//#define SINGLE_EXAMPLE_ODE 3 // whether to run one example ODE problem
 //#define EXAMPLE_ODES // whether to run example ODE problems
 //#define EXAMPLE_NLODES // whether to run example NLODE problems
 //#define EXAMPLE_PDES // whether to run example PDE problems
-//#define HEAT // whether to run the heat equation problem
+#define HEAT // whether to run the heat equation problem
 #define VERBOSE // whether to output console messages while training each time a new best fit is found amongst the population
 #define JSON // whether to output a json file for each executed run
 #define TREE_CHROMOSOMES // whether to use a TreePopulation instead of the grammar-based population
@@ -28,6 +28,7 @@
 #ifdef TREE_CHROMOSOMES
 	#define REPLICATION_BIAS 25
 	#define TREE_MUTATION_RATE 0.1
+	#define RANDOM_RATE 0.1
 #else
 	#define CHROMOSOME_SIZE 50
 	#define RANDOM_RATE 0.0
@@ -102,7 +103,7 @@ void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<dou
 
 	// Init population
 #ifdef TREE_CHROMOSOMES
-	TreePopulation<double> population(POPULATION_SIZE, REPLICATION_RATE, REPLICATION_BIAS, MUTATION_RATE, TREE_MUTATION_RATE, &fitnessFunction, decoder, seed);
+	TreePopulation<double> population(POPULATION_SIZE, REPLICATION_RATE, REPLICATION_BIAS, MUTATION_RATE, TREE_MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);
 	const TreeChromosome<double>* top = nullptr;
 #else
 	Population<double> population(POPULATION_SIZE, CHROMOSOME_SIZE, REPLICATION_RATE, MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);
