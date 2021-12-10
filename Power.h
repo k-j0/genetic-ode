@@ -22,6 +22,8 @@ public:
 
 	bool isConstant() const override { return a->isConstant(); }
 
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
+
 };
 #define PowerPtr(T, a, b) ExpressionPtr<T>(new Power<T>(a, b))
 #define PowerPtrf(a, b) PowerPtr(float, a, b)
@@ -61,4 +63,14 @@ inline ExpressionPtr<T> Power<T>::simplify() const {
 		return a->simplify();
 	}
 	return PowerPtr(T, a->simplify(), b->simplify());
+}
+
+template<typename T>
+inline ExpressionPtr<T> Power<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
+	auto newA = a->mutate(rng, mutationChance, grammar);
+	auto newB = b->mutate(rng, mutationChance, grammar);
+	if (MUTATION) {
+		return grammar->instantiateOperation(newA, newB, rng);
+	}
+	return PowerPtr(T, newA, newB);
 }

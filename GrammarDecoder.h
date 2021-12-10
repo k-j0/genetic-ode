@@ -110,6 +110,13 @@ public:
 	 */
 	const ExpressionPtr<T> decode(const std::vector<unsigned int>& sequence) const;
 
+	/**
+	 * Instantiates and returns a random function/operation/var on a random probability
+	 */
+	const ExpressionPtr<T> instantiateFunction(const ExpressionPtr<T> a, std::mt19937& rng) const;
+	const ExpressionPtr<T> instantiateOperation(const ExpressionPtr<T> a, const ExpressionPtr<T> b, std::mt19937& rng) const;
+	const ExpressionPtr<T> instantiateVar(std::mt19937& rng) const;
+
 private:
 
 	/**
@@ -152,6 +159,21 @@ inline const ExpressionPtr<T> GrammarDecoder<T>::decode(const std::vector<unsign
 	if (!decodeExpression(sequence, ptr, wraps, expression)) return nullptr;
 
 	return expression;
+}
+
+template<typename T>
+inline const ExpressionPtr<T> GrammarDecoder<T>::instantiateFunction(const ExpressionPtr<T> a, std::mt19937& rng) const {
+	return functions[abs(int(rng())) % functions.size()]->instantiate1Arg(a);
+}
+
+template<typename T>
+inline const ExpressionPtr<T> GrammarDecoder<T>::instantiateOperation(const ExpressionPtr<T> a, const ExpressionPtr<T> b, std::mt19937& rng) const {
+	return operations[abs(int(rng())) % operations.size()]->instantiate2Args(a, b);
+}
+
+template<typename T>
+inline const ExpressionPtr<T> GrammarDecoder<T>::instantiateVar(std::mt19937& rng) const {
+	return variables[abs(int(rng())) % variables.size()]->instantiate0Args();
 }
 
 template<typename T>

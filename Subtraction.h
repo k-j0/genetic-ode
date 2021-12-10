@@ -21,6 +21,8 @@ public:
 	std::string toString() const override { return "(" + a->toString() + " - " + b->toString() + ")"; }
 
 	bool isConstant() const override { return a->isConstant() && b->isConstant(); }
+
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
 };
 #define SubtractionPtr(T, a, b) ExpressionPtr<T>(new Subtraction<T>(a, b))
 #define SubtractionPtrf(a, b) SubtractionPtr(float, a, b)
@@ -56,4 +58,14 @@ inline ExpressionPtr<T> Subtraction<T>::simplify() const {
 		return a_s;
 	}
 	return SubtractionPtr(T, a_s, b_s);
+}
+
+template<typename T>
+inline ExpressionPtr<T> Subtraction<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
+	auto newA = a->mutate(rng, mutationChance, grammar);
+	auto newB = b->mutate(rng, mutationChance, grammar);
+	if (MUTATION) {
+		return grammar->instantiateOperation(newA, newB, rng);
+	}
+	return SubtractionPtr(T, newA, newB);
 }

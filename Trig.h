@@ -21,6 +21,8 @@ public:
 
 	bool isConstant() const override { return a->isConstant(); }
 
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
+
 };
 #define SinePtr(T, a) ExpressionPtr<T>(new Sine<T>(a))
 #define SinePtrf(a) SinePtr(float, a)
@@ -43,6 +45,8 @@ public:
 	std::string toString() const override { return "cos(" + a->toString() + ")"; }
 
 	bool isConstant() const override { return a->isConstant(); }
+
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
 
 };
 #define CosinePtr(T, a) ExpressionPtr<T>(new Cosine<T>(a))
@@ -72,6 +76,15 @@ inline ExpressionPtr<T> Sine<T>::simplify() const {
 }
 
 template<typename T>
+inline ExpressionPtr<T> Sine<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
+	auto newA = a->mutate(rng, mutationChance, grammar);
+	if (MUTATION) {
+		return grammar->instantiateFunction(newA, rng);
+	}
+	return SinePtr(T, newA);
+}
+
+template<typename T>
 inline T Cosine<T>::evaluate(T x, T y) const {
 	return cos(a->evaluate(x, y));
 }
@@ -89,4 +102,13 @@ inline ExpressionPtr<T> Cosine<T>::simplify() const {
 		return ConstantPtr(T, cos(a->evaluate(0, 0)));
 	}
 	return CosinePtr(T, a->simplify());
+}
+
+template<typename T>
+inline ExpressionPtr<T> Cosine<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
+	auto newA = a->mutate(rng, mutationChance, grammar);
+	if (MUTATION) {
+		return grammar->instantiateFunction(newA, rng);
+	}
+	return CosinePtr(T, newA);
 }

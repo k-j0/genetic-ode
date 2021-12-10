@@ -18,6 +18,8 @@ public:
 
 	bool isConstant() const override { return false; }
 
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
+
 };
 #define VarXPtr(T) ExpressionPtr<T>(new VarX<T>())
 #define VarXPtrf VarXPtr(float)
@@ -39,7 +41,25 @@ public:
 
 	bool isConstant() const override { return false; }
 
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
+
 };
 #define VarYPtr(T) ExpressionPtr<T>(new VarY<T>())
 #define VarYPtrf VarYPtr(float)
 #define VarYPtrd VarYPtr(double)
+
+template<typename T>
+inline ExpressionPtr<T> VarX<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
+	if (MUTATION) {
+		return grammar->instantiateVar(rng);
+	}
+	return VarXPtr(T);
+}
+
+template<typename T>
+inline ExpressionPtr<T> VarY<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
+	if (MUTATION) {
+		return grammar->instantiateVar(rng);
+	}
+	return VarYPtr(T);
+}

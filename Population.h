@@ -197,3 +197,5 @@ inline const Chromosome<T>* Population<T>::nextGeneration() {
 	// Return top performer
 	return &chromosomes[0];
 }
+
+#undef RAND

@@ -22,6 +22,8 @@ public:
 
 	bool isConstant() const override { return a->isConstant(); }
 
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const override;
+
 };
 #define LogarithmPtr(T, a) ExpressionPtr<T>(new Logarithm<T>(a))
 #define LogarithmPtrf(a) LogarithmPtr(float, a)
@@ -49,4 +51,13 @@ inline ExpressionPtr<T> Logarithm<T>::simplify() const {
 		return ConstantPtr(T, log(a->evaluate(0, 0)));
 	}
 	return LogarithmPtr(T, a->simplify());
+}
+
+template<typename T>
+inline ExpressionPtr<T> Logarithm<T>::mutate(std::mt19937& rng, double mutationChance, const GrammarDecoder<T>* grammar) const {
+	auto newA = a->mutate(rng, mutationChance, grammar);
+	if (MUTATION) {
+		return grammar->instantiateFunction(newA, rng);
+	}
+	return LogarithmPtr(T, newA);
 }

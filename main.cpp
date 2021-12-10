@@ -7,6 +7,7 @@
 //#define EXAMPLE_PDES // whether to run example PDE problems
 #define HEAT // whether to run the heat equation problem
 #define VERBOSE true
+#define TREE_CHROMOSOMES // whether to use a TreePopulation instead of the grammar-based population
 
 
 #ifdef FULLY_RANDOM
@@ -48,6 +49,7 @@
 #include "Power.h"
 #include "GrammarDecoder.h"
 #include "Population.h"
+#include "TreePopulation.h"
 #if defined(EXAMPLE_ODES) or defined(EXAMPLE_NLODES)
 	#include "ExampleODEs.h"
 #endif
@@ -85,10 +87,15 @@ Fitness<double> heatPde(double tMax) {
 void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<double>* decoder, int seed) {
 
 	// Init population
+#ifdef TREE_CHROMOSOMES
+	TreePopulation<double> population(POPULATION_SIZE, &fitnessFunction, decoder, seed);
+	const TreeChromosome<double>* top = nullptr;
+#else
 	Population<double> population(POPULATION_SIZE, CHROMOSOME_SIZE, REPLICATION_RATE, MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);
+	const Chromosome<double>* top = nullptr;
+#endif
 
 	// Iterate over generations
-	const Chromosome<double>* top = nullptr;
 	int gen;
 	double fitness = INFINITY;
 	std::shared_ptr<Expression<double>> bestExpression = nullptr;
@@ -173,7 +180,7 @@ int main() {
 #endif
 
 #ifdef HEAT
-	threads.push_back(new std::thread(solve, "Heat", heatPde(1), decoder2d, 1));
+	threads.push_back(new std::thread(solve, "Heat", heatPde(1), decoder2d, 1337));
 #endif
 
 
