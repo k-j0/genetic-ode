@@ -23,7 +23,7 @@ public:
 
 	bool isConstant() const override { return a->isConstant(); }
 
-	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const override;
 
 };
 #define SinePtr(T, a) ExpressionPtr<T>(new Sine<T>(a))
@@ -50,7 +50,7 @@ public:
 
 	bool isConstant() const override { return a->isConstant(); }
 
-	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const override;
 
 };
 #define CosinePtr(T, a) ExpressionPtr<T>(new Cosine<T>(a))
@@ -80,9 +80,9 @@ inline ExpressionPtr<T> Sine<T>::simplify() const {
 }
 
 template<typename T>
-inline ExpressionPtr<T> Sine<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const {
+inline ExpressionPtr<T> Sine<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const {
 	TREE_MUTATION();
-	auto newA = a->mutate(rng, mutationChance, treeMutationChance, grammar);
+	auto newA = a->mutate(rng, mutationChance, treeMutationChance, grammar, false);
 	if (MUTATION) {
 		return grammar->instantiateFunction(newA, rng);
 	}
@@ -110,9 +110,9 @@ inline ExpressionPtr<T> Cosine<T>::simplify() const {
 }
 
 template<typename T>
-inline ExpressionPtr<T> Cosine<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const {
+inline ExpressionPtr<T> Cosine<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const {
 	TREE_MUTATION();
-	auto newA = a->mutate(rng, mutationChance, treeMutationChance, grammar);
+	auto newA = a->mutate(rng, mutationChance, treeMutationChance, grammar, false);
 	if (MUTATION) {
 		return grammar->instantiateFunction(newA, rng);
 	}

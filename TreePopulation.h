@@ -152,7 +152,7 @@ inline const TreeChromosome<T>* TreePopulation<T>::nextGeneration() {
 				// mutations - note that we only mutate children, not parents
 
 				// modify random nodes and subtrees in expression
-				chromosomes[i].expression = chromosomes[i].expression->mutate(rng, mutationRate, treeMutationRate, decoder);
+				chromosomes[i].expression = chromosomes[i].expression->mutate(rng, mutationRate, treeMutationRate, decoder, true);
 
 				break;
 			}

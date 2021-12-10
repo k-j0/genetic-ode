@@ -23,7 +23,7 @@ public:
 
 	bool isConstant() const override { return a->isConstant() && b->isConstant(); }
 
-	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const override;
 };
 #define MultiplicationPtr(T, a, b) ExpressionPtr<T>(new Multiplication<T>(a, b))
 #define MultiplicationPtrf(a, b) MultiplicationPtr(float, a, b)
@@ -67,11 +67,14 @@ inline ExpressionPtr<T> Multiplication<T>::simplify() const {
 }
 
 template<typename T>
-inline ExpressionPtr<T> Multiplication<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const {
-	TREE_MUTATION();
-	auto newA = a->mutate(rng, mutationChance, treeMutationChance, grammar);
-	auto newB = b->mutate(rng, mutationChance, treeMutationChance, grammar);
-	if (MUTATION) {
+inline ExpressionPtr<T> Multiplication<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const {
+	// prevent the first multiplication at the top of the tree from mutating
+	if (!first) {
+		TREE_MUTATION();
+	}
+	auto newA = a->mutate(rng, mutationChance, treeMutationChance, grammar, false);
+	auto newB = b->mutate(rng, mutationChance, treeMutationChance, grammar, false);
+	if (!first && MUTATION) {
 		return grammar->instantiateOperation(newA, newB, rng);
 	}
 	return MultiplicationPtr(T, newA, newB);

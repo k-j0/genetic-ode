@@ -24,7 +24,7 @@ public:
 
 	bool isConstant() const override { return a->isConstant(); }
 
-	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const override;
 
 };
 #define SquareRootPtr(T, a) ExpressionPtr<T>(new SquareRoot<T>(a))
@@ -57,9 +57,9 @@ inline ExpressionPtr<T> SquareRoot<T>::simplify() const {
 }
 
 template<typename T>
-inline ExpressionPtr<T> SquareRoot<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const {
+inline ExpressionPtr<T> SquareRoot<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const {
 	TREE_MUTATION();
-	auto newA = a->mutate(rng, mutationChance);
+	auto newA = a->mutate(rng, mutationChance, treeMutationChance, grammar, false);
 	if (MUTATION) {
 		return grammar->instantiateFunction(newA, rng);
 	}

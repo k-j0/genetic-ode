@@ -51,7 +51,7 @@ public:
 	/**
 	 * Potentially mutates the expression or one of its sub-nodes with a random probability, for use in genetic algorithms
 	 */
-	virtual const std::shared_ptr<Expression<T>> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const = 0;
+	virtual const std::shared_ptr<Expression<T>> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const = 0;
 
 };
 template<typename T>
@@ -84,7 +84,7 @@ public:
 
 	bool isConstant() const override { return true; }
 
-	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const override;
 };
 #define ConstantPtr(T, v) ExpressionPtr<T>(new Constant<T>(v))
 #define ConstantPtrf(v) ConstantPtr(float, v)
@@ -109,7 +109,7 @@ inline ExpressionPtr<T> Constant<T>::simplify() const {
 }
 
 template<typename T>
-inline ExpressionPtr<T> Constant<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const {
+inline ExpressionPtr<T> Constant<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const {
 	TREE_MUTATION();
 	T value = v;
 	if (MUTATION) {

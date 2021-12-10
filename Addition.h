@@ -23,7 +23,7 @@ public:
 
 	bool isConstant() const override { return a->isConstant() && b->isConstant(); }
 
-	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const override;
+	ExpressionPtr<T> mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const override;
 };
 #define AdditionPtr(T, a, b) ExpressionPtr<T>(new Addition<T>(a, b))
 #define AdditionPtrf(a, b) AdditionPtr(float, a, b)
@@ -62,10 +62,10 @@ inline ExpressionPtr<T> Addition<T>::simplify() const {
 }
 
 template<typename T>
-inline ExpressionPtr<T> Addition<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar) const {
+inline ExpressionPtr<T> Addition<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const {
 	TREE_MUTATION();
-	auto newA = a->mutate(rng, mutationChance, treeMutationChance, grammar);
-	auto newB = b->mutate(rng, mutationChance, treeMutationChance, grammar);
+	auto newA = a->mutate(rng, mutationChance, treeMutationChance, grammar, false);
+	auto newB = b->mutate(rng, mutationChance, treeMutationChance, grammar, false);
 	if (MUTATION) {
 		return grammar->instantiateOperation(newA, newB, rng);
 	}
