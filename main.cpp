@@ -227,8 +227,11 @@ int main() {
 		G1d(Logarithm),
 		// G1d(SquareRoot) <- not including sqrt() in the grammar since it's not quite general enough, we already have powers so it's possible to obtain ^0.5 anyways
 	};
-	auto decoder1d = new GrammarDecoder<double>(0, variables1d, operations, functions);
-	auto decoder2d = new GrammarDecoder<double>(0, variables2d, operations, functions);
+	std::vector<double> constants = {
+		-1, 0, 1, 2, 3, M_PI, 4, 5, 6, 7, 8, 9, 10
+	};
+	auto decoder1d = new GrammarDecoder<double>(0, variables1d, operations, functions, constants);
+	auto decoder2d = new GrammarDecoder<double>(0, variables2d, operations, functions, constants);
 
 
 	std::vector<std::thread*> threads;

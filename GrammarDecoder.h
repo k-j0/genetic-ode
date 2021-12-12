@@ -92,6 +92,7 @@ private:
 	const std::vector<GrammaticalElement_base<T>*> variables;
 	const std::vector<GrammaticalElement_base<T>*> operations;
 	const std::vector<GrammaticalElement_base<T>*> functions;
+	const std::vector<T> constants;
 
 public:
 
@@ -102,8 +103,9 @@ public:
 		const int& maxWraparounds,
 		const std::vector<GrammaticalElement_base<T>*>& variables,
 		const std::vector<GrammaticalElement_base<T>*>& operations,
-		const std::vector<GrammaticalElement_base<T>*>& functions
-	) : maxWraparounds(maxWraparounds), variables(variables), operations(operations), functions(functions) {}
+		const std::vector<GrammaticalElement_base<T>*>& functions,
+		const std::vector<T>& constants
+	) : maxWraparounds(maxWraparounds), variables(variables), operations(operations), functions(functions), constants(constants) {}
 
 	/**
 	 * Decodes a sequence of integers into a valid mathematical expression
@@ -180,9 +182,7 @@ inline const ExpressionPtr<T> GrammarDecoder<T>::instantiateVar(std::mt19937& rn
 
 template<typename T>
 inline const ExpressionPtr<T> GrammarDecoder<T>::instantiateConstant(std::mt19937& rng) const {
-	T cnstnt = T(abs(int(rng())) % 22 - 10); // 0..21 -> -10..11
-	if (cnstnt == 11) cnstnt = M_PI; // -10..10 OR pi
-	return ConstantPtr(T, cnstnt);
+	return ConstantPtr(T, constants[abs(int(rng())) % constants.size()]);
 }
 
 template<typename T>
@@ -325,10 +325,8 @@ inline bool GrammarDecoder<T>::decodeConstant(const std::vector<unsigned int>& s
 		}
 	}
 
-	// one of [-10,10] or pi as constant
-	T cnstnt = T(head % 22 - 10); // 0..21 -> -10..11
-	if (cnstnt == 11) cnstnt = M_PI; // -10..10 OR pi
-	outConstant = ConstantPtr(T, cnstnt);
+	// one of the available constants
+	outConstant = ConstantPtr(T, constants[head % constants.size()]);
 
 	return true;
 }
