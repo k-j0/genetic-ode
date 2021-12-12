@@ -11,6 +11,7 @@
 //#define VERBOSE // whether to output console messages while training each time a new best fit is found amongst the population
 #define JSON // whether to output a json file for each executed run
 #define TREE_CHROMOSOMES // whether to use a TreePopulation instead of the grammar-based population
+#define MULTI_RUN // whether to run each problem 50 times instead of once, with a random seed each time
 
 
 #ifdef FULLY_RANDOM
@@ -22,10 +23,10 @@
 	#define RANDOM_RATE 0.9996
 	#define GENERATIONS 1000
 #else
-	#define POPULATION_SIZE 2000
+	#define POPULATION_SIZE 5000
 	#define REPLICATION_RATE 0.05
 	#define MUTATION_RATE 0.1
-	#define GENERATIONS 1000
+	#define GENERATIONS 5000
 #ifdef TREE_CHROMOSOMES
 	#define REPLICATION_BIAS 25
 	#define TREE_MUTATION_RATE 0.1
@@ -123,82 +124,89 @@ Fitness<double> heatPdeNoPi(double tMax) {
  */
 void solve(std::string name, Fitness<double> fitnessFunction, GrammarDecoder<double>* decoder, int seed) {
 
+#ifdef MULTI_RUN
+	int ogSeed = seed;
+	for (; seed < ogSeed + 50; ++seed) {
+#endif
 
-	// Init population
+		// Init population
 #ifdef TREE_CHROMOSOMES
-	TreePopulation<double> population(POPULATION_SIZE, REPLICATION_RATE, REPLICATION_BIAS, MUTATION_RATE, TREE_MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);
-	const TreeChromosome<double>* top = nullptr;
+		TreePopulation<double> population(POPULATION_SIZE, REPLICATION_RATE, REPLICATION_BIAS, MUTATION_RATE, TREE_MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);
+		const TreeChromosome<double>* top = nullptr;
 #else
-	Population<double> population(POPULATION_SIZE, CHROMOSOME_SIZE, REPLICATION_RATE, MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);
-	const Chromosome<double>* top = nullptr;
+		Population<double> population(POPULATION_SIZE, CHROMOSOME_SIZE, REPLICATION_RATE, MUTATION_RATE, RANDOM_RATE, &fitnessFunction, decoder, seed);
+		const Chromosome<double>* top = nullptr;
 #endif
 
 
-	// create json string with results (hard-coded json structure since it's kept fairly simple)
+		// create json string with results (hard-coded json structure since it's kept fairly simple)
 #ifdef JSON
-	std::string json = "{\"time\":" + std::to_string(time(nullptr)) + ",\"seed\":" + std::to_string(seed) + ",\"problem\":\"" + name + "\",\"useTrees\":";
+		std::string json = "{\"time\":" + std::to_string(time(nullptr)) + ",\"seed\":" + std::to_string(seed) + ",\"problem\":\"" + name + "\",\"useTrees\":";
 #ifdef TREE_CHROMOSOMES
-	json += "true,";
+		json += "true,";
 #else
-	json += "false,";
+		json += "false,";
 #endif
-	json += "\"populationSize\":" + std::to_string(POPULATION_SIZE) + ",";
-	json += "\"replicationRate\":" + std::to_string(REPLICATION_RATE) + ",";
-	json += "\"mutationRate\":" + std::to_string(MUTATION_RATE) + ",";
-	json += "\"maxGeneration\":" + std::to_string(GENERATIONS) + ",";
+		json += "\"populationSize\":" + std::to_string(POPULATION_SIZE) + ",";
+		json += "\"replicationRate\":" + std::to_string(REPLICATION_RATE) + ",";
+		json += "\"mutationRate\":" + std::to_string(MUTATION_RATE) + ",";
+		json += "\"maxGeneration\":" + std::to_string(GENERATIONS) + ",";
 #ifdef TREE_CHROMOSOMES
-	json += "\"replicationBias\":" + std::to_string(REPLICATION_BIAS) + ",";
-	json += "\"treeMutationRate\":" + std::to_string(TREE_MUTATION_RATE) + ",";
+		json += "\"replicationBias\":" + std::to_string(REPLICATION_BIAS) + ",";
+		json += "\"treeMutationRate\":" + std::to_string(TREE_MUTATION_RATE) + ",";
 #else
-	json += "\"chromosomeSize\":" + std::to_string(CHROMOSOME_SIZE) + ",";
-	json += "\"randomRate\":" + std::to_string(RANDOM_RATE) + ",";
+		json += "\"chromosomeSize\":" + std::to_string(CHROMOSOME_SIZE) + ",";
+		json += "\"randomRate\":" + std::to_string(RANDOM_RATE) + ",";
 #endif
-	json += "\"generations\":[";
+		json += "\"generations\":[";
 #endif
 
 
-	// Iterate over generations
-	int gen;
-	double fitness = INFINITY;
-	std::shared_ptr<Expression<double>> bestExpression = nullptr;
-	for (gen = 1; gen <= GENERATIONS; ++gen) {
-		top = population.nextGeneration();
-		if (top && top->fitness < fitness) {
-			fitness = top->fitness;
-			bestExpression = top->expression;
+		// Iterate over generations
+		int gen;
+		double fitness = INFINITY;
+		std::shared_ptr<Expression<double>> bestExpression = nullptr;
+		for (gen = 1; gen <= GENERATIONS; ++gen) {
+			top = population.nextGeneration();
+			if (top && top->fitness < fitness) {
+				fitness = top->fitness;
+				bestExpression = top->expression;
 #ifdef VERBOSE
-			printf("%s \tGen. %d, \tfitness %f, \tf(x, y) = %s\n", name.c_str(), gen, fitness, top->expression->toString().c_str());
+				printf("%s \tGen. %d, \tfitness %f, \tf(x, y) = %s\n", name.c_str(), gen, fitness, top->expression->toString().c_str());
 #endif
 #ifdef JSON // add one json object to the array of generations each time a new best fit is found
-			json += "{\"generation\":" + std::to_string(gen) + ",\"fitness\":" + std::to_string(top->fitness) + ",";
-			json += "\"expression\":\"" + top->expression->toString() + "\",\"jsExpression\":\"" + top->expression->toJsString() + "\"},";
+				json += "{\"generation\":" + std::to_string(gen) + ",\"fitness\":" + std::to_string(top->fitness) + ",";
+				json += "\"expression\":\"" + top->expression->toString() + "\",\"jsExpression\":\"" + top->expression->toJsString() + "\"},";
 #endif
+			}
+			if (top && top->fitness < 1e-7) {
+				break;
+			}
 		}
-		if (top && top->fitness < 1e-7) {
-			break;
+
+
+		// Log result
+		if (!top) {
+			printf("Could not solve %s, null result.\n\n", name.c_str());
+		} else {
+			printf("\nFinished solving %s in %d generations: \tfitness %f, \tf(x, y) = %s\n\n", name.c_str(), gen, fitness, bestExpression->toString().c_str());
+			printf("d/dx f(x, y) = %s\n", bestExpression->derivative(0)->simplify()->toString().c_str());
+			printf("d/dy f(x, y) = %s\n", bestExpression->derivative(1)->simplify()->toString().c_str());
+			printf("d^2/dx^2 f(x, y) = %s\n", bestExpression->derivative(0)->derivative(0)->simplify()->toString().c_str());
+			printf("d^2/dy^2 f(x, y) = %s\n\n", bestExpression->derivative(1)->derivative(1)->simplify()->toString().c_str());
 		}
-	}
-	
-
-	// Log result
-	if (!top) {
-		printf("Could not solve %s, null result.\n\n", name.c_str());
-	} else {
-		printf("\nFinished solving %s in %d generations: \tfitness %f, \tf(x, y) = %s\n\n", name.c_str(), gen, fitness, bestExpression->toString().c_str());
-		printf("d/dx f(x, y) = %s\n", bestExpression->derivative(0)->simplify()->toString().c_str());
-		printf("d/dy f(x, y) = %s\n", bestExpression->derivative(1)->simplify()->toString().c_str());
-		printf("d^2/dx^2 f(x, y) = %s\n", bestExpression->derivative(0)->derivative(0)->simplify()->toString().c_str());
-		printf("d^2/dy^2 f(x, y) = %s\n\n", bestExpression->derivative(1)->derivative(1)->simplify()->toString().c_str());
-	}
 
 
-	// close json string and output to file
+		// close json string and output to file
 #ifdef JSON
-	json = json.substr(0, json.length() - 1); // remove last trailing comma
-	json += "]}";
-	FileWriter::Write("results/" + name + "_" + std::to_string(time(nullptr)) + ".json", json);
+		json = json.substr(0, json.length() - 1); // remove last trailing comma
+		json += "]}";
+		FileWriter::Write("results/" + name + "_" + std::to_string(time(nullptr)) + ".json", json);
 #endif
 
+#ifdef MULTI_RUN
+	}
+#endif
 }
 
 
