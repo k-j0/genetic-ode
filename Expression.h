@@ -111,11 +111,15 @@ inline ExpressionPtr<T> Constant<T>::simplify() const {
 template<typename T>
 inline ExpressionPtr<T> Constant<T>::mutate(std::mt19937& rng, double mutationChance, double treeMutationChance, const GrammarDecoder<T>* grammar, bool first) const {
 	TREE_MUTATION();
-	T value = v;
 	if (MUTATION) {
-		std::normal_distribution<T> n(0, 1);
-		value += n(rng);
+		// either modify the value by a little bit (normal distrib), or pick a new constant altogether
+		if (abs(int(rng())) % 2 == 0) {
+			std::normal_distribution<T> n(0, 1);
+			return ConstantPtr(T, v + n(rng));
+		} else {
+			return grammar->instantiateConstant(rng);
+		}
 	}
-	return ConstantPtr(T, value);
+	return ConstantPtr(T, v);
 }
 
