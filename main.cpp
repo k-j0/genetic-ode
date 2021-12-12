@@ -3,11 +3,12 @@
 
 //#define FULLY_RANDOM // whether to completely randomise the population every single generation
 //#define SINGLE_EXAMPLE_ODE 3 // whether to run one example ODE problem
-//#define EXAMPLE_ODES // whether to run example ODE problems
-//#define EXAMPLE_NLODES // whether to run example NLODE problems
-//#define EXAMPLE_PDES // whether to run example PDE problems
+#define EXAMPLE_ODES // whether to run example ODE problems
+#define EXAMPLE_NLODES // whether to run example NLODE problems
+#define EXAMPLE_PDES // whether to run example PDE problems
 #define HEAT // whether to run the heat equation problem
-#define VERBOSE // whether to output console messages while training each time a new best fit is found amongst the population
+#define HEAT_NO_PI // whether to run the modified heat equation problem (with L=pi instead of L=1, eliminating pi from the solution)
+//#define VERBOSE // whether to output console messages while training each time a new best fit is found amongst the population
 #define JSON // whether to output a json file for each executed run
 #define TREE_CHROMOSOMES // whether to use a TreePopulation instead of the grammar-based population
 
@@ -264,7 +265,10 @@ int main() {
 
 	// solve 1D temporal heat equation problem
 #ifdef HEAT
-	threads.push_back(new std::thread(solve, "Heat", heatPdeNoPi(1), decoder2d, 1337));
+	threads.push_back(new std::thread(solve, "Heat", heatPde(1), decoder2d, 1337));
+#endif
+#ifdef HEAT_NO_PI
+	threads.push_back(new std::thread(solve, "Heat[-pi]", heatPdeNoPi(1), decoder2d, 1337));
 #endif
 
 
